@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 import random
 from dotenv import load_dotenv
 from sqlalchemy.orm import Session, joinedload
-from database import VerificationCode, SessionLocal, User, Meeting, UserMeeting, get_db
+from database import VerificationCode, SessionLocal, User, Meeting, UserMeeting, get_db, init_db
 from schemas import SMSRequest, SMSVerify, UserCreate, UserOut, CSParseRequest, CSParseResponse, MeetingCreate, MeetingOut, UserMeetingInterest
 from sqlalchemy.exc import IntegrityError # 데이터베이스 무결성 오류 처리용
 import json
@@ -49,11 +49,23 @@ else:
 # FastAPI 앱 인스턴스 생성
 app = FastAPI(title="Community Control AI", version="1.0.0")
 
+# 앱 시작 시 데이터베이스 초기화
+@app.on_event("startup")
+async def startup_event():
+    """앱 시작 시 데이터베이스 테이블 생성"""
+    init_db()
+    print("✅ Database initialized successfully!")
+
 # Static 파일 서빙
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Jinja2 템플릿 설정
 templates = Jinja2Templates(directory="templates")
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for Railway"""
+    return {"status": "healthy", "service": "Community Control AI"}
 
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
