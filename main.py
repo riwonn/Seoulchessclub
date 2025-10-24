@@ -100,9 +100,18 @@ async def health_check():
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
     """Root endpoint - landing page"""
-    if templates is None:
-        return HTMLResponse(content="<h1>Community Control AI</h1><p>Templates not configured. Check deployment logs.</p>")
-    return templates.TemplateResponse("index.html", {"request": request})
+    try:
+        if templates is None:
+            return HTMLResponse(content="<h1>Community Control AI</h1><p>Templates not configured. Check deployment logs.</p>")
+        return templates.TemplateResponse("index.html", {"request": request})
+    except Exception as e:
+        print(f"❌ Error rendering index.html: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return HTMLResponse(
+            content=f"<h1>Community Control AI</h1><p>Error loading page: {str(e)}</p>",
+            status_code=500
+        )
 
 @app.get("/dashboard", response_class=HTMLResponse)
 async def dashboard(request: Request, db: Session = Depends(get_db)):
