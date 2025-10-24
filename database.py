@@ -5,8 +5,14 @@ from datetime import datetime
 import os
 
 # 데이터베이스 URL 설정
-# 개발 환경: SQLite 사용, Production 환경: 환경 변수 사용
-SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./community_control.db")
+# Railway 환경: /tmp 디렉토리 사용 (쓰기 가능)
+# 로컬 환경: 현재 디렉토리 사용
+if os.getenv("RAILWAY_ENVIRONMENT"):
+    # Railway 환경에서는 /tmp 디렉토리에 SQLite DB 저장
+    SQLALCHEMY_DATABASE_URL = "sqlite:////tmp/community_control.db"
+else:
+    # 로컬 개발 환경
+    SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./community_control.db")
 
 # DB 엔진 생성
 engine = create_engine(

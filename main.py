@@ -53,14 +53,35 @@ app = FastAPI(title="Community Control AI", version="1.0.0")
 @app.on_event("startup")
 async def startup_event():
     """앱 시작 시 데이터베이스 테이블 생성"""
-    init_db()
-    print("✅ Database initialized successfully!")
+    try:
+        print("🚀 Starting application...")
+        print(f"📁 Current working directory: {os.getcwd()}")
+        print(f"🌍 RAILWAY_ENVIRONMENT: {os.getenv('RAILWAY_ENVIRONMENT', 'Not set')}")
+        init_db()
+        print("✅ Database initialized successfully!")
+    except Exception as e:
+        print(f"❌ Error during startup: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise
 
-# Static 파일 서빙
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# Static 파일 서빙 (디렉토리 존재 확인)
+try:
+    if os.path.exists("static"):
+        app.mount("/static", StaticFiles(directory="static"), name="static")
+        print("✅ Static files mounted successfully")
+    else:
+        print("⚠️  Warning: 'static' directory not found")
+except Exception as e:
+    print(f"⚠️  Warning: Could not mount static files: {str(e)}")
 
 # Jinja2 템플릿 설정
-templates = Jinja2Templates(directory="templates")
+try:
+    templates = Jinja2Templates(directory="templates")
+    print("✅ Templates configured successfully")
+except Exception as e:
+    print(f"❌ Error configuring templates: {str(e)}")
+    templates = None
 
 @app.get("/health")
 async def health_check():
