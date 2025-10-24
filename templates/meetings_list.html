@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seoul Chess Club - Meeting List</title>
+    <script src="/static/js/i18n.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #2d1b3d 0%, #1a0f2e 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            background: rgba(192, 132, 252, 0.2);
+            border: 1px solid rgba(192, 132, 252, 0.4);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 24px;
+            color: #c084fc;
+            z-index: 100;
+        }
+
+        .back-button:hover {
+            background: rgba(192, 132, 252, 0.3);
+            transform: translateX(-5px);
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #e9b8ff 0%, #c084fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            line-height: 1.7;
+            margin-bottom: 20px;
+            color: #d1b3e6;
+            text-align: center;
+        }
+
+        .user-info {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 15px;
+            background: rgba(192, 132, 252, 0.1);
+            border: 1px solid rgba(192, 132, 252, 0.3);
+            border-radius: 12px;
+        }
+
+        .user-info-text {
+            font-size: 15px;
+            color: #e9b8ff;
+            margin-bottom: 10px;
+        }
+
+        .register-link {
+            display: inline-block;
+            padding: 8px 20px;
+            background: rgba(192, 132, 252, 0.2);
+            border: 1px solid rgba(192, 132, 252, 0.4);
+            border-radius: 8px;
+            color: #c084fc;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .register-link:hover {
+            background: rgba(192, 132, 252, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .icons-row {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 30px 0 50px 0;
+        }
+
+        .icon-item {
+            font-size: 48px;
+            opacity: 0.8;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .icon-item:nth-child(2) {
+            animation-delay: 0.5s;
+        }
+
+        .icon-item:nth-child(3) {
+            animation-delay: 1s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .meetings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .meeting-card {
+            background: linear-gradient(135deg, rgba(192, 132, 252, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%);
+            border: 1px solid rgba(192, 132, 252, 0.3);
+            border-radius: 16px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .meeting-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(192, 132, 252, 0.2);
+            border-color: #c084fc;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .meeting-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #e9b8ff;
+            margin-bottom: 15px;
+        }
+
+        .meeting-info {
+            margin-bottom: 12px;
+            color: #d1b3e6;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .meeting-info-icon {
+            font-size: 18px;
+            opacity: 0.8;
+        }
+
+        .meeting-capacity {
+            display: inline-block;
+            padding: 6px 14px;
+            background: rgba(192, 132, 252, 0.2);
+            border: 1px solid rgba(192, 132, 252, 0.4);
+            border-radius: 20px;
+            font-size: 13px;
+            color: #c084fc;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .register-btn {
+            width: 100%;
+            padding: 14px;
+            margin-top: 20px;
+            font-size: 15px;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #e9b8ff 0%, #c084fc 100%);
+            color: #1a0f2e;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .register-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(192, 132, 252, 0.4);
+        }
+
+        .register-btn:active {
+            transform: translateY(0);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #8b7099;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        /* 모달 스타일 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(26, 15, 46, 0.9);
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #2d1b3d 0%, #1a0f2e 100%);
+            border: 2px solid rgba(192, 132, 252, 0.5);
+            border-radius: 20px;
+            padding: 35px;
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #e9b8ff;
+            margin-bottom: 15px;
+        }
+
+        .modal-message {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #d1b3e6;
+            margin-bottom: 30px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .modal-btn {
+            padding: 12px 30px;
+            font-size: 15px;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .modal-btn-primary {
+            background: linear-gradient(135deg, #e9b8ff 0%, #c084fc 100%);
+            color: #1a0f2e;
+        }
+
+        .modal-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(192, 132, 252, 0.4);
+        }
+
+        .modal-btn-secondary {
+            background: rgba(192, 132, 252, 0.2);
+            color: #c084fc;
+            border: 1px solid rgba(192, 132, 252, 0.4);
+        }
+
+        .modal-btn-secondary:hover {
+            background: rgba(192, 132, 252, 0.3);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(192, 132, 252, 0.3);
+            border-top-color: #c084fc;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .meetings-grid {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 26px;
+            }
+
+            .modal-content {
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 뒤로가기 버튼 -->
+    <div class="back-button" onclick="window.history.back()" title="Go back">
+        ←
+    </div>
+
+    <div class="container">
+        <h1 id="pageTitle">Upcoming Meetings</h1>
+        <p class="subtitle" id="pageSubtitle">
+            join us for chess, coffee, and great conversations
+        </p>
+
+        <!-- 사용자 정보 -->
+        <div class="user-info" id="userInfo" style="display: none;">
+            <p class="user-info-text"><strong id="userNameDisplay"></strong><span id="welcomeUserText">님, 오늘은 어떤 모임을 신청할까요?</span></p>
+        </div>
+
+        <div class="user-info" id="guestInfo" style="display: none;">
+            <p class="user-info-text" id="registerPromptText">Register and join the meeting!</p>
+            <a href="/register_form" class="register-link" id="registerButtonText">Register</a>
+        </div>
+
+        <!-- 아이콘 -->
+        <div class="icons-row">
+            <div class="icon-item">☕</div>
+            <div class="icon-item">♞</div>
+            <div class="icon-item">📖</div>
+        </div>
+
+        <!-- 모임 리스트 -->
+        <div class="meetings-grid">
+            {% if meetings %}
+                {% for meeting in meetings %}
+                <div class="meeting-card">
+                    <h3 class="meeting-title">{{ meeting.title }}</h3>
+                    
+                    <div class="meeting-info">
+                        <span class="meeting-info-icon">📅</span>
+                        <span>{{ meeting.date_time.strftime('%Y년 %m월 %d일 %H:%M') }}</span>
+                    </div>
+                    
+                    <div class="meeting-info">
+                        <span class="meeting-info-icon">📍</span>
+                        <span>{{ meeting.location }}</span>
+                    </div>
+                    
+                    <div class="meeting-capacity">
+                        <span class="capacity-label">Capacity</span>: {{ meeting.capacity }} <span class="people-label">people</span>
+                    </div>
+                    
+                    <button class="register-btn" onclick="handleRegister('{{ meeting.id }}')">
+                        <span class="register-btn-text">Register</span>
+                    </button>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">📭</div>
+                    <h3 style="margin-bottom: 10px; color: #d1b3e6;" class="no-meetings-text">No upcoming meetings</h3>
+                    <p class="new-meeting-soon-text">A new meeting will be held soon!</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- 1차 모달: 결제 안내 -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-icon">💳</div>
+            <h2 class="modal-title" id="paymentTitleText">Payment Instruction</h2>
+            <p class="modal-message">
+                <span id="paymentMessageText">The list is confirmed after the payment.</span><br>
+                <strong style="color: #c084fc;" id="bankInfoText">카카오뱅크(Kakao Bank) 3333-24-5091670 김*현</strong>
+            </p>
+            <div style="margin: 20px 0; text-align: left; padding: 15px; background: rgba(192, 132, 252, 0.1); border-radius: 10px;">
+                <label style="display: flex; align-items: center; cursor: pointer; font-size: 15px; color: #e9b8ff;">
+                    <input type="checkbox" id="paidCheckbox" onchange="toggleConfirmButton()" style="width: 20px; height: 20px; margin-right: 10px; cursor: pointer; accent-color: #c084fc;">
+                    <span id="iPaidText">I paid</span>
+                </label>
+            </div>
+            <div class="loading" id="paymentLoading">
+                <div class="spinner"></div>
+                <p style="margin-top: 15px; color: #d1b3e6;" id="processingText">Processing...</p>
+            </div>
+            <div class="modal-buttons" id="paymentButtons">
+                <button class="modal-btn modal-btn-secondary" onclick="closePaymentModal()" id="cancelButtonText">Cancel</button>
+                <button class="modal-btn modal-btn-primary" id="confirmButton" onclick="confirmPayment()" disabled style="opacity: 0.5; cursor: not-allowed;"><span id="confirmButtonText">Confirm</span></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2차 모달: 최종 확인 -->
+    <div id="confirmationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-icon">✅</div>
+            <h2 class="modal-title" id="confirmationTitleText">Application Received</h2>
+            <p class="modal-message" id="confirmationMessageText">
+                The application has been received.<br>
+                We will confirm the application within 1-2 days.
+            </p>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-primary" onclick="closeConfirmationModal()" id="confirmationButtonText">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentMeetingId = null;
+        
+        // localStorage에서 user_id 가져오기 (없으면 1 사용)
+        const USER_ID = parseInt(localStorage.getItem('user_id')) || 1;
+        const USER_NAME = localStorage.getItem('user_name') || 'Guest';
+
+        // 다국어 텍스트 적용 함수
+        function applyTranslations() {
+            // 페이지 제목 및 부제목
+            document.getElementById('pageTitle').textContent = t('upcomingMeetings');
+            document.getElementById('pageSubtitle').textContent = t('subtitle');
+            
+            // 사용자 환영 메시지
+            document.getElementById('welcomeUserText').textContent = t('welcomeUser');
+            document.getElementById('registerPromptText').textContent = t('registerPrompt');
+            document.getElementById('registerButtonText').textContent = t('registerButton');
+            
+            // 모임 카드 공통 텍스트
+            const capacityLabels = document.querySelectorAll('.capacity-label');
+            capacityLabels.forEach(el => el.textContent = t('capacity'));
+            
+            const peopleLabels = document.querySelectorAll('.people-label');
+            peopleLabels.forEach(el => el.textContent = t('people'));
+            
+            const registerBtnTexts = document.querySelectorAll('.register-btn-text');
+            registerBtnTexts.forEach(el => el.textContent = t('registerMeeting'));
+            
+            // 빈 상태 메시지
+            const noMeetingsText = document.querySelector('.no-meetings-text');
+            if (noMeetingsText) noMeetingsText.textContent = t('noMeetings');
+            
+            const newMeetingSoonText = document.querySelector('.new-meeting-soon-text');
+            if (newMeetingSoonText) newMeetingSoonText.textContent = t('newMeetingSoon');
+            
+            // 모달 텍스트
+            document.getElementById('paymentTitleText').textContent = t('paymentTitle');
+            document.getElementById('paymentMessageText').textContent = t('paymentMessage');
+            document.getElementById('bankInfoText').textContent = t('bankInfo');
+            document.getElementById('iPaidText').textContent = t('iPaid');
+            document.getElementById('processingText').textContent = t('processing');
+            document.getElementById('cancelButtonText').textContent = t('cancel');
+            document.getElementById('confirmButtonText').textContent = t('confirm');
+            
+            document.getElementById('confirmationTitleText').textContent = t('confirmationTitle');
+            document.getElementById('confirmationMessageText').innerHTML = t('confirmationMessage').replace(/\n/g, '<br>');
+            document.getElementById('confirmationButtonText').textContent = t('confirm');
+        }
+
+        // 페이지 로드 시 사용자 정보 표시 및 다국어 적용
+        window.addEventListener('DOMContentLoaded', function() {
+            // 다국어 적용
+            applyTranslations();
+            
+            if (localStorage.getItem('user_id') && localStorage.getItem('user_name')) {
+                // 로그인된 사용자
+                document.getElementById('userNameDisplay').textContent = USER_NAME;
+                document.getElementById('userInfo').style.display = 'block';
+            } else {
+                // 게스트
+                document.getElementById('guestInfo').style.display = 'block';
+            }
+        });
+
+        // 1단계: 참가 신청 버튼 클릭
+        function handleRegister(meetingId) {
+            currentMeetingId = meetingId;
+            showPaymentModal();
+        }
+
+        // 결제 안내 모달 표시
+        function showPaymentModal() {
+            document.getElementById('paymentModal').classList.add('show');
+            // 모달 열 때마다 체크박스 초기화
+            document.getElementById('paidCheckbox').checked = false;
+            toggleConfirmButton();
+        }
+
+        // 결제 안내 모달 닫기
+        function closePaymentModal() {
+            document.getElementById('paymentModal').classList.remove('show');
+            currentMeetingId = null;
+            // 체크박스 초기화
+            document.getElementById('paidCheckbox').checked = false;
+            toggleConfirmButton();
+        }
+
+        // Confirm 버튼 활성화/비활성화
+        function toggleConfirmButton() {
+            const checkbox = document.getElementById('paidCheckbox');
+            const confirmBtn = document.getElementById('confirmButton');
+            
+            if (checkbox.checked) {
+                confirmBtn.disabled = false;
+                confirmBtn.style.opacity = '1';
+                confirmBtn.style.cursor = 'pointer';
+            } else {
+                confirmBtn.disabled = true;
+                confirmBtn.style.opacity = '0.5';
+                confirmBtn.style.cursor = 'not-allowed';
+            }
+        }
+
+        // 2단계: 결제 확인 (API 호출)
+        async function confirmPayment() {
+            const loadingDiv = document.getElementById('paymentLoading');
+            const buttonsDiv = document.getElementById('paymentButtons');
+
+            // 로딩 표시
+            buttonsDiv.style.display = 'none';
+            loadingDiv.classList.add('show');
+
+            try {
+                // POST /meetings/register_interest API 호출
+                const response = await fetch('/meetings/register_interest', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: USER_ID,
+                        meeting_id: currentMeetingId
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    // 에러 처리
+                    alert(`${t('error')}: ${data.detail || t('errorRegistering')}`);
+                    closePaymentModal();
+                    return;
+                }
+
+                // 성공: 1차 모달 닫고 2차 모달 표시
+                closePaymentModal();
+                showConfirmationModal();
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert(t('errorServer'));
+                closePaymentModal();
+            } finally {
+                // 로딩 숨기기 및 버튼 다시 표시
+                loadingDiv.classList.remove('show');
+                buttonsDiv.style.display = 'flex';
+            }
+        }
+
+        // 최종 확인 모달 표시
+        function showConfirmationModal() {
+            document.getElementById('confirmationModal').classList.add('show');
+        }
+
+        // 최종 확인 모달 닫기
+        function closeConfirmationModal() {
+            document.getElementById('confirmationModal').classList.remove('show');
+            currentMeetingId = null;
+            
+            // 페이지 새로고침 (선택사항)
+            // location.reload();
+        }
+
+        // ESC 키로 모달 닫기
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closePaymentModal();
+                closeConfirmationModal();
+            }
+        });
+
+        // 모달 배경 클릭 시 닫기
+        document.getElementById('paymentModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                closePaymentModal();
+            }
+        });
+
+        document.getElementById('confirmationModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                closeConfirmationModal();
+            }
+        });
+    </script>
+</body>
+</html>
+

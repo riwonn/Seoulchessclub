@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seoul Chess Club - Registration</title>
+    <script src="/static/js/i18n.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #2d1b3d 0%, #1a0f2e 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 420px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            background: rgba(192, 132, 252, 0.2);
+            border: 1px solid rgba(192, 132, 252, 0.4);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 24px;
+            color: #c084fc;
+            z-index: 100;
+        }
+
+        .back-button:hover {
+            background: rgba(192, 132, 252, 0.3);
+            transform: translateX(-5px);
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+            animation: fadeIn 0.4s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #e9b8ff 0%, #c084fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .description {
+            font-size: 16px;
+            line-height: 1.7;
+            margin-bottom: 30px;
+            color: #d1b3e6;
+        }
+
+        .icons-row {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 40px 0;
+            padding: 20px;
+        }
+
+        .icon-item {
+            font-size: 48px;
+            opacity: 0.8;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .icon-item:nth-child(2) {
+            animation-delay: 0.5s;
+        }
+
+        .icon-item:nth-child(3) {
+            animation-delay: 1s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: #d1b3e6;
+            font-weight: 500;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 15px 18px;
+            font-size: 16px;
+            border: 1px solid rgba(193, 132, 252, 0.3);
+            border-radius: 12px;
+            background-color: rgba(42, 25, 60, 0.6);
+            color: #ffffff;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #c084fc;
+            background-color: rgba(42, 25, 60, 0.9);
+            box-shadow: 0 0 0 3px rgba(192, 132, 252, 0.1);
+        }
+
+        input::placeholder {
+            color: #8b7099;
+        }
+
+        select {
+            cursor: pointer;
+        }
+
+        select option {
+            background-color: #2d1b3d;
+            color: #ffffff;
+        }
+
+        .phone-input-wrapper {
+            display: flex;
+            gap: 12px;
+        }
+
+        .country-code {
+            width: 100px;
+            flex-shrink: 0;
+        }
+
+        .phone-input {
+            flex: 1;
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #e9b8ff 0%, #c084fc 100%);
+            color: #1a0f2e;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(192, 132, 252, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: #4a3a5a;
+            color: #8b7099;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .consent-text {
+            font-size: 12px;
+            color: #8b7099;
+            text-align: center;
+            margin-top: 20px;
+            line-height: 1.5;
+        }
+
+        .error-message {
+            display: none;
+            padding: 14px 18px;
+            background-color: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            border-radius: 12px;
+            color: #fca5a5;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .error-message.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .success-message {
+            display: none;
+            padding: 14px 18px;
+            background-color: rgba(34, 197, 94, 0.15);
+            border: 1px solid rgba(34, 197, 94, 0.4);
+            border-radius: 12px;
+            color: #86efac;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .success-message.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        .welcome-card {
+            background: linear-gradient(135deg, rgba(192, 132, 252, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%);
+            border: 1px solid rgba(192, 132, 252, 0.3);
+            border-radius: 16px;
+            padding: 25px;
+            margin: 30px 0;
+        }
+
+        .welcome-card h3 {
+            font-size: 18px;
+            margin-bottom: 18px;
+            color: #e9b8ff;
+        }
+
+        .welcome-card p {
+            color: #d1b3e6;
+            font-size: 15px;
+            line-height: 1.8;
+            margin-bottom: 10px;
+        }
+
+        .stat-highlight {
+            color: #c084fc;
+            font-weight: 700;
+            font-size: 20px;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .radio-item {
+            flex: 1;
+            min-width: 110px;
+        }
+
+        .radio-item input[type="radio"] {
+            display: none;
+        }
+
+        .radio-item label {
+            display: block;
+            padding: 14px 18px;
+            border: 1px solid rgba(192, 132, 252, 0.3);
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background-color: rgba(42, 25, 60, 0.4);
+        }
+
+        .radio-item input[type="radio"]:checked + label {
+            background: linear-gradient(135deg, rgba(192, 132, 252, 0.3) 0%, rgba(139, 92, 246, 0.2) 100%);
+            border-color: #c084fc;
+            color: #e9b8ff;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #8b7099;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(192, 132, 252, 0.3);
+            border-top-color: #c084fc;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                max-width: 100%;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .description {
+                font-size: 15px;
+            }
+
+            .icons-row {
+                gap: 20px;
+            }
+
+            .icon-item {
+                font-size: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 뒤로가기 버튼 -->
+    <div class="back-button" onclick="window.history.back()" title="Go back">
+        ←
+    </div>
+
+    <div class="container">
+        <!-- 화면 1: 전화번호 입력 (#phone-step) -->
+        <div id="phoneScreen" class="screen active">
+            <h1>Welcome to Seoul Chess Club</h1>
+            <p class="description">
+                SCC helps you meet new people,<br>
+                discover your city, & deepen<br>
+                your relationships.
+            </p>
+
+            <!-- 아이콘 -->
+            <div class="icons-row">
+                <div class="icon-item">☕</div>
+                <div class="icon-item">♞</div>
+                <div class="icon-item">📖</div>
+            </div>
+
+            <p class="description" style="margin-top: 10px; font-size: 14px;">
+                enter your phone number to get started.
+            </p>
+
+            <div class="error-message" id="phoneError"></div>
+
+            <div class="form-group">
+                <div class="phone-input-wrapper">
+                    <select id="countryCode" class="country-code">
+                        <option value="+82">🇰🇷 +82</option>
+                        <option value="+1">🇺🇸 +1</option>
+                        <option value="+44">🇬🇧 +44</option>
+                        <option value="+86">🇨🇳 +86</option>
+                        <option value="+81">🇯🇵 +81</option>
+                    </select>
+                    <input 
+                        type="text" 
+                        id="phoneNumber" 
+                        class="phone-input" 
+                        placeholder="010-1234-5678"
+                        maxlength="13"
+                    >
+                </div>
+            </div>
+
+            <button onclick="checkUserAndProceed()">
+                <span id="phoneButtonText">CONTINUE</span>
+                <div class="spinner" id="phoneSpinner" style="display: none;"></div>
+            </button>
+
+            <p class="consent-text">
+                by continuing, you consent to receive SMS<br>
+                (text STOP to cancel anytime)
+            </p>
+        </div>
+
+        <!-- 화면 2: 환영/재방문 화면 (#welcome-step) -->
+        <div id="welcomeScreen" class="screen">
+            <h1 id="welcomeTitle">Hello!</h1>
+            <p class="description" id="welcomeSubtitle">
+                Thank you for coming back 🎉
+            </p>
+
+            <div class="welcome-card">
+                <h3>📅 Attendance History</h3>
+                <p>✓ You have attended the last 3 meetings</p>
+                <p>✓ Next meeting: 11/20 Gangnam</p>
+                <p style="margin-top: 15px;">
+                    Total visits: <span class="stat-highlight" id="totalVisits">0</span> times
+                </p>
+            </div>
+
+            <button onclick="goToDetailsForm()">Next meeting registration</button>
+        </div>
+
+        <!-- 화면 3: 상세 정보 입력 (#details-step) -->
+        <div id="detailsScreen" class="screen">
+            <h1>tell us about yourself</h1>
+            <p class="description">
+                share your details to join the community
+            </p>
+
+            <div class="error-message" id="registerError"></div>
+            <div class="success-message" id="successMessage"></div>
+
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="name">Name *</label>
+                    <input 
+                        type="text" 
+                        id="name" 
+                        name="name" 
+                        placeholder="Jane Doe"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email *</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        placeholder="your@email.com"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label>Gender *</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" id="male" name="gender" value="MALE" required>
+                            <label for="male">Male</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="female" name="gender" value="FEMALE">
+                            <label for="female">Female</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="other" name="gender" value="OTHER">
+                            <label for="other">Other</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="birthYear">Birth Year (Optional)</label>
+                    <input 
+                        type="number" 
+                        id="birthYear" 
+                        name="birth_year" 
+                        placeholder="1990"
+                        min="1900"
+                        max="2010"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="chessExperience">Chess Experience *</label>
+                    <select id="chessExperience" name="chess_experience" required>
+                        <option value="">Select your chess experience</option>
+                        <option value="NO_BUT_WANT_TO_LEARN">I don't know how to play chess, but I want to learn</option>
+                        <option value="KNOW_RULES_ONLY">I know the rules only</option>
+                        <option value="OCCASIONALLY_PLAY">I play occasionally</option>
+                        <option value="PLAY_WELL">I play well</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                        <label for="chessRating">Chess Rating (Optional)</label>
+                    <select id="chessRating" name="chess_rating">
+                        <option value="">Select your chess rating</option>
+                        <option value="I_DONT_KNOW">I don't know</option>
+                        <option value="UNDER_1000">Under 1000</option>
+                        <option value="BETWEEN_1000_1500">1000-1500</option>
+                        <option value="BETWEEN_1500_2000">1500-2000</option>
+                        <option value="OVER_2000">Over 2000</option>
+                    </select>
+            </div>
+
+                <input type="hidden" id="finalPhoneNumber" name="phone_number">
+
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p style="margin-top: 10px;">Registering...</p>
+            </div>
+            
+                <button type="submit" id="submitBtn">SIGN UP</button>
+            </form>
+            </div>
+    </div>
+
+    <script>
+        let userPhoneNumber = '';
+        let existingUser = null;
+
+        // 페이지 로드 시 이미 등록된 사용자인지 확인 및 다국어 적용
+        window.addEventListener('DOMContentLoaded', function() {
+            const userId = localStorage.getItem('user_id');
+            const userName = localStorage.getItem('user_name');
+            
+            // 이미 등록된 사용자면 모임 리스트로 리디렉션
+            if (userId && userName) {
+                window.location.href = '/meetings_list';
+            }
+            
+            // 다국어 적용 (간단 버전 - 주요 메시지만)
+            // Note: register.html은 이미 영문으로 작성되어 있으므로 필요시 추가 적용
+        });
+
+        // 1단계: 전화번호 입력 후 사용자 존재 여부 체크
+        async function checkUserAndProceed() {
+            const phoneNumber = document.getElementById('phoneNumber').value.trim();
+            const phoneError = document.getElementById('phoneError');
+            const phoneButtonText = document.getElementById('phoneButtonText');
+            const phoneSpinner = document.getElementById('phoneSpinner');
+
+            // 전화번호 검증
+            if (!phoneNumber) {
+                phoneError.textContent = '전화번호를 입력해주세요.';
+                phoneError.classList.add('show');
+                return;
+            }
+
+            // 숫자만 추출
+            const digitsOnly = phoneNumber.replace(/\D/g, '');
+            
+            if (digitsOnly.length < 10) {
+                phoneError.textContent = '올바른 전화번호를 입력해주세요.';
+                phoneError.classList.add('show');
+                return;
+            }
+
+            // 전화번호 저장
+            userPhoneNumber = digitsOnly;
+
+            // 에러 메시지 숨기기
+            phoneError.classList.remove('show');
+
+            // 로딩 시작
+            phoneButtonText.style.display = 'none';
+            phoneSpinner.style.display = 'inline-block';
+
+            // 사용자 조회 시도
+            try {
+                const response = await fetch(`/get_user_by_phone?phone_number=${userPhoneNumber}`);
+                
+                if (response.ok) {
+                    // 재방문 고객 (200 OK) - localStorage에 저장하고 모임 리스트로 바로 이동
+                    existingUser = await response.json();
+                    
+                    // localStorage에 사용자 정보 저장
+                    localStorage.setItem('user_id', existingUser.id);
+                    localStorage.setItem('user_name', existingUser.name);
+                    
+                    // 모임 리스트로 바로 리디렉션
+                    window.location.href = '/meetings_list';
+                } else if (response.status === 404) {
+                    // 신규 고객 (404 Not Found) - 상세 정보 입력 화면으로 이동
+                    existingUser = null;
+                    showDetailsForm();
+                } else {
+                    // 기타 오류 - 상세 정보 입력 화면으로 이동 (안전하게)
+                    existingUser = null;
+                    showDetailsForm();
+                }
+            } catch (error) {
+                console.error('Error checking user:', error);
+                // 오류 발생 시 상세 정보 입력 화면으로 이동
+                existingUser = null;
+                showDetailsForm();
+            } finally {
+                // 로딩 종료
+                phoneButtonText.style.display = 'inline';
+                phoneSpinner.style.display = 'none';
+            }
+        }
+
+        // 2단계 A: 환영 화면 표시 (재방문 고객)
+        function showWelcomeScreen() {
+            // 환영 메시지 업데이트
+            document.getElementById('welcomeTitle').textContent = `${existingUser.name}, Hello!`;
+            document.getElementById('totalVisits').textContent = existingUser.total_visits || 0;
+
+            // 화면 전환
+            document.getElementById('phoneScreen').classList.remove('active');
+            document.getElementById('welcomeScreen').classList.add('active');
+        }
+
+        // 2단계 B: 상세 정보 입력 화면 표시 (신규 고객)
+        function showDetailsForm() {
+            document.getElementById('phoneScreen').classList.remove('active');
+            document.getElementById('detailsScreen').classList.add('active');
+
+            // 숨겨진 필드에 전화번호 설정
+            document.getElementById('finalPhoneNumber').value = userPhoneNumber;
+        }
+
+        // 3단계: 환영 화면에서 상세 정보 입력 화면으로 이동 (재방문 고객)
+        function goToDetailsForm() {
+            document.getElementById('welcomeScreen').classList.remove('active');
+            document.getElementById('detailsScreen').classList.add('active');
+
+            // 기존 사용자 정보로 폼 미리 채우기
+            if (existingUser) {
+                document.getElementById('name').value = existingUser.name || '';
+                document.getElementById('email').value = existingUser.email || '';
+                
+                // 성별 설정
+                if (existingUser.gender) {
+                    const genderInput = document.querySelector(`input[name="gender"][value="${existingUser.gender}"]`);
+                    if (genderInput) genderInput.checked = true;
+                }
+                
+                // 출생년도 설정
+                if (existingUser.birth_year) {
+                    document.getElementById('birthYear').value = existingUser.birth_year;
+                }
+                
+                // 체스 경험 설정
+                if (existingUser.chess_experience) {
+                    document.getElementById('chessExperience').value = existingUser.chess_experience;
+                }
+                
+                // 체스 레이팅 설정
+                if (existingUser.chess_rating) {
+                    document.getElementById('chessRating').value = existingUser.chess_rating;
+                }
+            }
+
+            // 전화번호 설정
+            document.getElementById('finalPhoneNumber').value = userPhoneNumber;
+        }
+
+        // Enter 키로 전화번호 입력 완료
+        document.getElementById('phoneNumber').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                checkUserAndProceed();
+            }
+        });
+
+        // 전화번호 입력 자동 포맷팅
+        document.getElementById('phoneNumber').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.startsWith('010') && value.length <= 11) {
+                if (value.length > 3 && value.length <= 7) {
+                    value = value.slice(0, 3) + '-' + value.slice(3);
+                } else if (value.length > 7) {
+                    value = value.slice(0, 3) + '-' + value.slice(3, 7) + '-' + value.slice(7);
+                }
+            }
+            e.target.value = value;
+        });
+
+        // 최종 등록 폼 제출
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const loading = document.getElementById('loading');
+            const registerError = document.getElementById('registerError');
+            const successMessage = document.getElementById('successMessage');
+
+            // 에러/성공 메시지 숨기기
+            registerError.classList.remove('show');
+            successMessage.classList.remove('show');
+
+            // 로딩 시작
+            submitBtn.disabled = true;
+            loading.classList.add('show');
+
+            // 폼 데이터 수집
+            const formData = {
+                name: document.getElementById('name').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                phone_number: userPhoneNumber,
+                gender: document.querySelector('input[name="gender"]:checked')?.value,
+                chess_experience: document.getElementById('chessExperience').value
+            };
+
+            // 선택 필드 추가
+            const birthYear = document.getElementById('birthYear').value;
+            if (birthYear) {
+                formData.birth_year = parseInt(birthYear);
+            }
+
+            const chessRating = document.getElementById('chessRating').value;
+            if (chessRating) {
+                formData.chess_rating = chessRating;
+            }
+
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // 성공
+                    successMessage.textContent = '회원가입이 완료되었습니다! 모임 목록으로 이동합니다... 🎉';
+                    successMessage.classList.add('show');
+                    
+                    // 폼 초기화
+                    document.getElementById('registerForm').reset();
+                    
+                    // 사용자 ID 저장 (모임 신청에 사용)
+                    localStorage.setItem('user_id', data.id);
+                    localStorage.setItem('user_name', data.name);
+                    
+                    // 2초 후 모임 목록으로 이동
+                    setTimeout(() => {
+                        window.location.href = '/meetings_list';
+                    }, 2000);
+                } else {
+                    // 오류
+                    registerError.textContent = data.detail || '회원가입 중 오류가 발생했습니다.';
+                    registerError.classList.add('show');
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                registerError.textContent = '서버와 통신 중 오류가 발생했습니다. 다시 시도해주세요.';
+                registerError.classList.add('show');
+            } finally {
+                // 로딩 종료
+                submitBtn.disabled = false;
+                loading.classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>

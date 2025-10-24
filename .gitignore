@@ -1,0 +1,16 @@
+Python
+
+pycache/
+*.pyc
+venv/
+.env
+
+Database
+
+*.db
+*.sqlite3
+community_control.db
+
+OS
+
+.DS_Store
