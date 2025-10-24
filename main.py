@@ -54,11 +54,20 @@ app = FastAPI(title="Community Control AI", version="1.0.0")
 async def startup_event():
     """앱 시작 시 데이터베이스 테이블 생성"""
     try:
-        print("🚀 Starting application...")
+        print("=" * 60)
+        print("🚀 Starting Community Control AI Application...")
         print(f"📁 Current working directory: {os.getcwd()}")
-        print(f"🌍 RAILWAY_ENVIRONMENT: {os.getenv('RAILWAY_ENVIRONMENT', 'Not set')}")
+        print(f"📂 Directory contents: {os.listdir('.')}")
+        print(f"🌍 Environment Variables:")
+        print(f"  - RAILWAY_ENVIRONMENT: {os.getenv('RAILWAY_ENVIRONMENT', 'Not set')}")
+        print(f"  - RAILWAY_STATIC_URL: {os.getenv('RAILWAY_STATIC_URL', 'Not set')}")
+        print(f"  - PORT: {os.getenv('PORT', 'Not set')}")
+        print(f"  - Static dir exists: {os.path.exists('static')}")
+        print(f"  - Templates dir exists: {os.path.exists('templates')}")
+        print("=" * 60)
         init_db()
         print("✅ Database initialized successfully!")
+        print("=" * 60)
     except Exception as e:
         print(f"❌ Error during startup: {str(e)}")
         import traceback
@@ -91,6 +100,8 @@ async def health_check():
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
     """Root endpoint - landing page"""
+    if templates is None:
+        return HTMLResponse(content="<h1>Community Control AI</h1><p>Templates not configured. Check deployment logs.</p>")
     return templates.TemplateResponse("index.html", {"request": request})
 
 @app.get("/dashboard", response_class=HTMLResponse)
