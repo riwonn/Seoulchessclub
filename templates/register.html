@@ -6,8 +6,7 @@
     <title>Seoul Chess Club - Registration</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@1&display=swap" rel="stylesheet">
-    <link href="https://fonts.cdnfonts.com/css/fustat" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="/static/js/i18n.js"></script>
     <style>
         * {
@@ -17,9 +16,9 @@
         }
 
         body {
-            font-family: 'Instrument Serif', serif;
-            background: linear-gradient(135deg, #2A0D29 0%, #1a0515 100%);
-            color: #FFB3FD;
+            font-family: 'Crimson Pro', serif;
+            background: linear-gradient(180deg, #3d2352 0%, #2d1a3d 50%, #1f0f2e 100%);
+            color: #e8d4f0;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -29,7 +28,7 @@
 
         .container {
             width: 100%;
-            max-width: 420px;
+            max-width: 380px;
             margin: 0 auto;
             position: relative;
         }
@@ -40,8 +39,8 @@
             left: 20px;
             width: 50px;
             height: 50px;
-            background: rgba(255, 179, 253, 0.2);
-            border: 1px solid rgba(255, 179, 253, 0.4);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -49,12 +48,12 @@
             cursor: pointer;
             transition: all 0.3s ease;
             font-size: 24px;
-            color: #FFB3FD;
+            color: #e8d4f0;
             z-index: 100;
         }
 
         .back-button:hover {
-            background: rgba(255, 179, 253, 0.3);
+            background: rgba(255, 255, 255, 0.15);
             transform: translateX(-5px);
         }
 
@@ -79,56 +78,23 @@
         }
 
         h1 {
-            font-family: 'Fustat', sans-serif;
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 20px;
-            letter-spacing: -0.5px;
-            background: linear-gradient(135deg, #FFB3FD 0%, #ff99f5 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-family: 'Crimson Pro', serif;
+            font-size: 32px;
+            font-weight: 400;
+            margin-bottom: 30px;
+            letter-spacing: 0;
+            color: #ffffff;
         }
 
         .description {
-            font-family: 'Instrument Serif', serif;
-            font-style: italic;
-            font-size: 16px;
-            line-height: 1.7;
-            margin-bottom: 30px;
-            color: #FFB3FD;
-            opacity: 0.85;
-        }
-
-        .icons-row {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            margin: 40px 0;
-            padding: 20px;
-        }
-
-        .icon-item {
-            font-size: 48px;
-            opacity: 0.8;
-            animation: float 3s ease-in-out infinite;
-        }
-
-        .icon-item:nth-child(2) {
-            animation-delay: 0.5s;
-        }
-
-        .icon-item:nth-child(3) {
-            animation-delay: 1s;
-        }
-
-        @keyframes float {
-            0%, 100% {
-                transform: translateY(0);
-            }
-            50% {
-                transform: translateY(-10px);
-            }
+            font-family: 'Crimson Pro', serif;
+            font-style: normal;
+            font-size: 17px;
+            line-height: 1.6;
+            margin-bottom: 40px;
+            color: #e8d4f0;
+            opacity: 0.9;
+            font-weight: 400;
         }
 
         .form-group {
@@ -139,22 +105,22 @@
             display: block;
             font-size: 14px;
             margin-bottom: 8px;
-            color: #d1b3e6;
-            font-weight: 500;
+            color: #e8d4f0;
+            font-weight: 400;
         }
 
         input[type="text"],
         input[type="email"],
         input[type="number"],
         select {
-            font-family: 'Instrument Serif', serif;
+            font-family: 'Crimson Pro', serif;
             width: 100%;
-            padding: 15px 18px;
+            padding: 16px 20px;
             font-size: 16px;
-            border: 1px solid rgba(255, 179, 253, 0.3);
-            border-radius: 12px;
-            background-color: rgba(42, 13, 41, 0.6);
-            color: #FFB3FD;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 14px;
+            background-color: rgba(61, 35, 82, 0.4);
+            color: #ffffff;
             transition: all 0.3s ease;
         }
 
@@ -163,13 +129,13 @@
         input[type="number"]:focus,
         select:focus {
             outline: none;
-            border-color: #FFB3FD;
-            background-color: rgba(42, 13, 41, 0.9);
-            box-shadow: 0 0 0 3px rgba(255, 179, 253, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+            background-color: rgba(61, 35, 82, 0.6);
+            box-shadow: 0 0 0 3px rgba(232, 164, 216, 0.15);
         }
 
         input::placeholder {
-            color: #8b7099;
+            color: rgba(255, 255, 255, 0.4);
         }
 
         select {
@@ -177,7 +143,7 @@
         }
 
         select option {
-            background-color: #2d1b3d;
+            background-color: #3d2352;
             color: #ffffff;
         }
 
@@ -196,25 +162,26 @@
         }
 
         button {
-            font-family: 'Fustat', sans-serif;
+            font-family: 'Crimson Pro', serif;
             width: 100%;
-            padding: 16px;
-            font-size: 16px;
-            font-weight: 600;
+            padding: 18px;
+            font-size: 15px;
+            font-weight: 500;
             border: none;
-            border-radius: 12px;
-            background: linear-gradient(135deg, #FFB3FD 0%, #ff99f5 100%);
-            color: #2A0D29;
+            border-radius: 14px;
+            background: #e8a4d8;
+            color: #2d1a3d;
             cursor: pointer;
             transition: all 0.3s ease;
             margin-top: 10px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
         }
 
         button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(255, 179, 253, 0.5);
+            box-shadow: 0 8px 20px rgba(232, 164, 216, 0.4);
+            background: #f0b4e0;
         }
 
         button:active {
@@ -230,7 +197,7 @@
 
         .consent-text {
             font-size: 12px;
-            color: #8b7099;
+            color: rgba(232, 212, 240, 0.6);
             text-align: center;
             margin-top: 20px;
             line-height: 1.5;
@@ -280,8 +247,8 @@
         }
 
         .welcome-card {
-            background: linear-gradient(135deg, rgba(192, 132, 252, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%);
-            border: 1px solid rgba(192, 132, 252, 0.3);
+            background: rgba(61, 35, 82, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 16px;
             padding: 25px;
             margin: 30px 0;
@@ -290,18 +257,18 @@
         .welcome-card h3 {
             font-size: 18px;
             margin-bottom: 18px;
-            color: #e9b8ff;
+            color: #ffffff;
         }
 
         .welcome-card p {
-            color: #d1b3e6;
+            color: #e8d4f0;
             font-size: 15px;
             line-height: 1.8;
             margin-bottom: 10px;
         }
 
         .stat-highlight {
-            color: #c084fc;
+            color: #e8a4d8;
             font-weight: 700;
             font-size: 20px;
         }
@@ -324,25 +291,25 @@
         .radio-item label {
             display: block;
             padding: 14px 18px;
-            border: 1px solid rgba(192, 132, 252, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 12px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            background-color: rgba(42, 25, 60, 0.4);
+            background-color: rgba(61, 35, 82, 0.4);
         }
 
         .radio-item input[type="radio"]:checked + label {
-            background: linear-gradient(135deg, rgba(255, 179, 253, 0.3) 0%, rgba(255, 153, 245, 0.2) 100%);
-            border-color: #FFB3FD;
-            color: #e9b8ff;
+            background: rgba(232, 164, 216, 0.3);
+            border-color: #e8a4d8;
+            color: #ffffff;
         }
 
         .loading {
             display: none;
             text-align: center;
             padding: 20px;
-            color: #8b7099;
+            color: rgba(232, 212, 240, 0.7);
         }
 
         .loading.show {
@@ -353,8 +320,8 @@
             display: inline-block;
             width: 24px;
             height: 24px;
-            border: 3px solid rgba(192, 132, 252, 0.3);
-            border-top-color: #c084fc;
+            border: 3px solid rgba(232, 164, 216, 0.3);
+            border-top-color: #e8a4d8;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
@@ -375,15 +342,7 @@
             }
 
             .description {
-                font-size: 15px;
-            }
-
-            .icons-row {
-                gap: 20px;
-            }
-
-            .icon-item {
-                font-size: 40px;
+                font-size: 16px;
             }
         }
     </style>
@@ -397,21 +356,14 @@
     <div class="container">
         <!-- 화면 1: 전화번호 입력 (#phone-step) -->
         <div id="phoneScreen" class="screen active">
-            <h1>Welcome to Seoul Chess Club</h1>
+            <h1>Welcome to SCC.</h1>
             <p class="description">
                 SCC helps you meet new people,<br>
                 discover your city, & deepen<br>
                 your relationships.
             </p>
 
-            <!-- 아이콘 -->
-            <div class="icons-row">
-                <div class="icon-item">☕</div>
-                <div class="icon-item">♞</div>
-                <div class="icon-item">📖</div>
-            </div>
-
-            <p class="description" style="margin-top: 10px; font-size: 14px;">
+            <p class="description" style="margin-top: 20px; margin-bottom: 30px; font-size: 16px;">
                 enter your phone number to get started.
             </p>
 
