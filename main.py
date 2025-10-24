@@ -49,6 +49,16 @@ else:
 # FastAPI 앱 인스턴스 생성
 app = FastAPI(title="Community Control AI", version="1.0.0")
 
+# 요청 로깅 미들웨어
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    print(f"🔵 Incoming request: {request.method} {request.url.path}")
+    print(f"   Client: {request.client.host if request.client else 'Unknown'}")
+    print(f"   Headers: {dict(request.headers)}")
+    response = await call_next(request)
+    print(f"✅ Response status: {response.status_code}")
+    return response
+
 # 앱 시작 시 데이터베이스 초기화
 @app.on_event("startup")
 async def startup_event():
