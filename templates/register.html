@@ -34,30 +34,6 @@
             position: relative;
         }
 
-        .back-button {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            width: 50px;
-            height: 50px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 24px;
-            color: #e8d4f0;
-            z-index: 100;
-        }
-
-        .back-button:hover {
-            background: rgba(255, 255, 255, 0.15);
-            transform: translateX(-5px);
-        }
-
         .screen {
             display: none;
         }
@@ -362,11 +338,6 @@
     </style>
 </head>
 <body>
-    <!-- 뒤로가기 버튼 -->
-    <div class="back-button" onclick="window.history.back()" title="Go back">
-        ←
-    </div>
-
     <div class="container">
         <!-- 화면 1: 전화번호 입력 (#phone-step) -->
         <div id="phoneScreen" class="screen active">

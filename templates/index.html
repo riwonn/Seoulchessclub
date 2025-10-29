@@ -37,33 +37,6 @@
             padding: 20px;
         }
 
-        .back-button {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            width: 50px;
-            height: 50px;
-            background: rgba(42, 13, 41, 0.5);
-            backdrop-filter: blur(6px);
-            border: 0.75px solid rgba(255, 179, 253, 0.3);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 24px;
-            color: #ffb3fd;
-            z-index: 1000;
-            text-decoration: none;
-        }
-
-        .back-button:hover {
-            background: rgba(42, 13, 41, 0.7);
-            transform: translateX(-5px);
-            border-color: rgba(255, 179, 253, 0.5);
-        }
-
         .side-gif {
             position: fixed;
             width: 150px;
@@ -159,8 +132,15 @@
         }
 
         .logo-icon {
-            width: 24px;
-            height: 27px;
+            width: auto;
+            height: 40px;
+            object-fit: contain;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .logo-icon:hover {
+            transform: scale(1.1);
         }
 
         .right-nav {
@@ -463,16 +443,11 @@
         }
 
         @media (max-width: 480px) {
-            .back-button {
-                width: 44px;
-                height: 44px;
-                font-size: 20px;
-            }
-
             .side-gif {
                 width: 100px;
                 height: 100px;
             }
+            
             .container {
                 max-width: 100%;
                 height: 100vh;
@@ -565,9 +540,6 @@
     </style>
 </head>
 <body>
-    <!-- 뒤로가기 버튼 -->
-    <a href="javascript:history.back()" class="back-button" title="Go back">←</a>
-
     <!-- 마우스 커서 GIF -->
     <img src="https://media.giphy.com/media/l0HlHJGHe3yAMhdQY/giphy.gif" alt="Chess Meme" class="side-gif" id="cursorGif">
 
@@ -576,9 +548,10 @@
             <div class="hero-card">
                 <!-- 배경 이미지 -->
                 <img 
-                    src="https://images.unsplash.com/photo-1528819622765-d6bcf132f793?w=600&h=900&fit=crop&q=80" 
+                    src="/static/images/hero.jpg" 
                     alt="Chess Community" 
                     class="hero-image"
+                    onerror="this.src='https://images.unsplash.com/photo-1611195974492-ca9d4d6c1746?w=600&h=900&fit=crop&q=80'"
                 >
             
             <!-- 오버레이 -->
@@ -587,9 +560,9 @@
             <!-- 상단 내비게이션 -->
             <div class="top-nav">
                 <!-- 로고 아이콘 -->
-                <svg class="logo-icon" viewBox="0 0 24 27" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 0L0 6.75V20.25L12 27L24 20.25V6.75L12 0Z" fill="#ffb3fd"/>
-                </svg>
+                <a href="/" style="display: flex; align-items: center;">
+                    <img src="/static/images/logo.png" alt="SCC Logo" class="logo-icon" onerror="this.style.display='none'">
+                </a>
                 
                 <div class="right-nav">
                     <a href="#about" class="nav-btn">about</a>
