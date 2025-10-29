@@ -6,7 +6,8 @@
     <title>Seoul Chess Club - Welcome</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fustat:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="/static/js/i18n.js"></script>
     <style>
         * {
@@ -16,9 +17,9 @@
         }
 
         body {
-            font-family: 'Crimson Pro', serif;
-            background: linear-gradient(180deg, #3d2352 0%, #2d1a3d 50%, #1f0f2e 100%);
-            color: #e8d4f0;
+            font-family: 'Fustat', sans-serif;
+            background: #0d0d0d;
+            color: #ffb3fd;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -28,9 +29,9 @@
 
         .container {
             width: 100%;
-            max-width: 450px;
+            max-width: 347px;
             height: 100vh;
-            max-height: 900px;
+            max-height: 720px;
             position: relative;
             display: flex;
             align-items: center;
@@ -41,9 +42,10 @@
         .hero-card {
             width: 100%;
             height: 100%;
-            border-radius: 30px;
+            border-radius: 24px;
             overflow: hidden;
             position: relative;
+            background: white;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
         }
 
@@ -78,9 +80,13 @@
             bottom: 0;
             background: linear-gradient(
                 to bottom,
-                rgba(42, 13, 41, 0.3) 0%,
-                rgba(42, 13, 41, 0.6) 60%,
-                rgba(42, 13, 41, 0.9) 100%
+                rgb(35, 19, 30) 0%,
+                rgba(35, 19, 30, 0) 28.846%
+            ),
+            linear-gradient(
+                90deg,
+                rgba(57, 34, 47, 0.5) 0%,
+                rgba(57, 34, 47, 0.5) 100%
             );
             z-index: 2;
         }
@@ -88,50 +94,59 @@
         /* 상단 내비게이션 */
         .top-nav {
             position: absolute;
-            top: 30px;
+            top: 20px;
             left: 0;
             right: 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 30px;
+            padding: 0 20px;
             z-index: 20;
         }
 
-        .left-nav {
+        .logo-icon {
+            width: 24px;
+            height: 27px;
+        }
+
+        .right-nav {
             display: flex;
-            gap: 20px;
+            gap: 12px;
+            align-items: center;
         }
 
         .nav-btn {
-            font-family: 'Crimson Pro', serif;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #e8d4f0;
-            padding: 10px 20px;
-            border-radius: 25px;
-            font-size: 14px;
-            font-weight: 500;
+            font-family: 'Instrument Serif', serif;
+            background: rgba(42, 13, 41, 0.5);
+            backdrop-filter: blur(6px);
+            border: 0.75px solid rgba(255, 179, 253, 0.3);
+            color: #ffbffd;
+            padding: 8px 14px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 400;
             cursor: pointer;
             transition: all 0.3s ease;
             text-decoration: none;
             display: inline-block;
+            height: 40px;
+            display: flex;
+            align-items: center;
         }
 
         .nav-btn:hover {
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(42, 13, 41, 0.7);
             transform: translateY(-2px);
-            border-color: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 179, 253, 0.5);
         }
 
         .instagram-btn {
-            width: 44px;
-            height: 44px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            background: rgba(42, 13, 41, 0.5);
+            backdrop-filter: blur(6px);
+            border: 0.75px solid rgba(255, 179, 253, 0.3);
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -140,18 +155,18 @@
         }
 
         .instagram-btn:hover {
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(42, 13, 41, 0.7);
             transform: translateY(-2px);
-            border-color: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 179, 253, 0.5);
         }
 
         .instagram-icon {
-            width: 22px;
-            height: 22px;
-            color: #e8d4f0;
+            width: 24px;
+            height: 24px;
+            color: #ffb3fd;
         }
 
-        /* 중앙 컨텐츠 (로고 등) */
+        /* 중앙 컨텐츠 (타이틀) */
         .center-content {
             position: absolute;
             top: 50%;
@@ -159,55 +174,75 @@
             transform: translate(-50%, -50%);
             text-align: center;
             z-index: 15;
+            width: 302px;
         }
 
-        .logo {
-            font-family: 'Crimson Pro', serif;
-            font-size: 48px;
-            font-weight: 300;
-            color: rgba(255, 255, 255, 0.15);
-            letter-spacing: 2px;
-            text-transform: uppercase;
+        .title-container {
+            display: flex;
+            flex-direction: column;
+            gap: 11.2px;
+            align-items: center;
+        }
+
+        .title-line {
+            display: flex;
+            gap: 9.8px;
+            align-items: flex-end;
+            line-height: 1.2;
+            color: #ffb3fd;
+            white-space: nowrap;
+        }
+
+        .title-regular {
+            font-family: 'Fustat', sans-serif;
+            font-weight: 500;
+            font-size: 33.25px;
+            letter-spacing: -1.33px;
+        }
+
+        .title-italic {
+            font-family: 'Instrument Serif', serif;
+            font-style: italic;
+            font-size: 36.4px;
+            letter-spacing: -1.456px;
         }
 
         /* SIGN UP 버튼 */
         .signup-section {
             position: absolute;
-            bottom: 60px;
-            left: 0;
-            right: 0;
+            bottom: 88px;
+            left: 50%;
+            transform: translateX(-50%);
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 30px;
-            padding: 0 30px;
+            gap: 0;
             z-index: 20;
         }
 
         .signup-btn {
-            font-family: 'Crimson Pro', serif;
-            background: #e8a4d8;
+            font-family: 'Instrument Serif', serif;
+            background: #4d1849;
             backdrop-filter: blur(10px);
-            border: none;
-            color: #2d1a3d;
-            padding: 16px 50px;
-            border-radius: 30px;
+            border: 0.75px solid rgba(255, 179, 253, 0.3);
+            color: #ffb3fd;
+            padding: 12px 28px 12px 24px;
+            border-radius: 14px;
             font-size: 16px;
-            font-weight: 500;
+            font-weight: 400;
             cursor: pointer;
             transition: all 0.3s ease;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 12px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
+            gap: 6px;
         }
 
         .signup-btn:hover {
-            background: #f0b4e0;
+            background: #5d1e59;
             transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(232, 164, 216, 0.4);
+            box-shadow: 0 10px 30px rgba(255, 179, 253, 0.3);
+            border-color: rgba(255, 179, 253, 0.5);
         }
 
         .arrow-icon {
@@ -222,20 +257,148 @@
 
         /* 하단 링크 */
         .footer-links {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
             display: flex;
-            gap: 20px;
-            font-size: 12px;
+            gap: 8px;
+            font-size: 13px;
+            align-items: center;
         }
 
         .footer-link {
-            font-family: 'Crimson Pro', serif;
-            color: rgba(232, 212, 240, 0.6);
+            font-family: 'Instrument Serif', serif;
+            font-style: italic;
+            color: #ffbffd;
             text-decoration: none;
             transition: color 0.3s ease;
         }
 
         .footer-link:hover {
-            color: rgba(232, 212, 240, 0.95);
+            color: #ffd4fe;
+        }
+
+        .footer-separator {
+            font-family: 'Instrument Serif', serif;
+            font-style: normal;
+            color: #ffbffd;
+        }
+
+        /* 모달 스타일 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(66, 66, 66, 0.5);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-box {
+            background: #2a0d29;
+            border-radius: 24px;
+            padding: 20px 20px 30px 20px;
+            max-width: 515px;
+            width: 90%;
+            position: relative;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .modal-box {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+
+        .modal-title-wrapper {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+        }
+
+        .modal-title {
+            display: flex;
+            gap: 9.8px;
+            align-items: flex-end;
+            line-height: 1.2;
+            color: #ffb3fd;
+            white-space: nowrap;
+        }
+
+        .modal-title .title-regular {
+            font-family: 'Fustat', sans-serif;
+            font-weight: 500;
+            font-size: 33.25px;
+            letter-spacing: -1.33px;
+        }
+
+        .modal-title .title-italic {
+            font-family: 'Instrument Serif', serif;
+            font-style: italic;
+            font-size: 36.4px;
+            letter-spacing: -1.456px;
+        }
+
+        .modal-close {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            flex-shrink: 0;
+            margin-left: 12px;
+            transition: transform 0.2s ease;
+        }
+
+        .modal-close:hover {
+            transform: rotate(90deg);
+        }
+
+        .modal-close svg {
+            width: 100%;
+            height: 100%;
+            stroke: #ffb3fd;
+        }
+
+        .modal-content {
+            font-family: 'Fustat', sans-serif;
+            font-weight: 500;
+            font-size: 16px;
+            line-height: 1.36;
+            color: #ffb3fd;
+            letter-spacing: -0.64px;
+        }
+
+        .modal-content p {
+            margin: 0 0 16px 0;
+        }
+
+        .modal-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        .modal-spacer {
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0;
         }
 
         /* 반응형 */
@@ -250,48 +413,59 @@
                 border-radius: 0;
             }
 
-            .top-nav {
-                top: 20px;
-                padding: 0 20px;
+            .title-regular {
+                font-size: 28px;
+                letter-spacing: -1.12px;
             }
 
-            .nav-btn {
-                padding: 8px 16px;
-                font-size: 13px;
+            .title-italic {
+                font-size: 30.6px;
+                letter-spacing: -1.224px;
             }
 
-            .instagram-btn {
-                width: 40px;
-                height: 40px;
-            }
-
-            .instagram-icon {
-                width: 20px;
-                height: 20px;
+            .center-content {
+                width: 280px;
             }
 
             .signup-section {
-                bottom: 40px;
-                padding: 0 20px;
+                bottom: 70px;
             }
 
-            .signup-btn {
-                padding: 14px 40px;
-                font-size: 15px;
+            .footer-links {
+                bottom: 30px;
             }
 
-            .logo {
-                font-size: 36px;
+            .modal-box {
+                width: 95%;
+                max-width: 100%;
+            }
+
+            .modal-title .title-regular {
+                font-size: 24px;
+                letter-spacing: -0.96px;
+            }
+
+            .modal-title .title-italic {
+                font-size: 26.4px;
+                letter-spacing: -1.056px;
+            }
+
+            .modal-content {
+                font-size: 14px;
             }
         }
 
         @media (max-height: 700px) {
             .signup-section {
-                bottom: 30px;
+                bottom: 60px;
+            }
+
+            .footer-links {
+                bottom: 20px;
             }
 
             .top-nav {
-                top: 20px;
+                top: 15px;
             }
         }
 
@@ -335,47 +509,125 @@
 
             <!-- 상단 내비게이션 -->
             <div class="top-nav">
-                <div class="left-nav">
+                <!-- 로고 아이콘 -->
+                <svg class="logo-icon" viewBox="0 0 24 27" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 0L0 6.75V20.25L12 27L24 20.25V6.75L12 0Z" fill="#ffb3fd"/>
+                </svg>
+                
+                <div class="right-nav">
                     <a href="#about" class="nav-btn">about</a>
-                    <a href="#contact" class="nav-btn">contact</a>
+                    <a href="https://www.instagram.com/seoulchessclub/" target="_blank" class="instagram-btn" title="Instagram">
+                        <!-- Instagram SVG Icon -->
+                        <svg class="instagram-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                        </svg>
+                    </a>
                 </div>
-                <a href="https://www.instagram.com/seoulchessclub/" target="_blank" class="instagram-btn" title="Instagram">
-                    <!-- Instagram SVG Icon -->
-                    <svg class="instagram-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                    </svg>
-                </a>
             </div>
 
-            <!-- 중앙 로고 (선택사항) -->
+            <!-- 중앙 타이틀 -->
             <div class="center-content">
-                <div class="logo">SCC</div>
+                <div class="title-container">
+                    <div class="title-line">
+                        <span class="title-regular">The</span>
+                        <span class="title-italic">Best Place</span>
+                        <span class="title-regular">to meet</span>
+                    </div>
+                    <div class="title-line">
+                        <span class="title-italic">New Friends</span>
+                        <span class="title-regular">in Seoul</span>
+                    </div>
+                </div>
             </div>
 
             <!-- SIGN UP 버튼 -->
             <div class="signup-section">
                 <a href="/register_form" class="signup-btn" id="signupBtn">
-                    <span>SIGN UP</span>
+                    <span>Sign Up</span>
                     <!-- Arrow SVG Icon -->
                     <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                         <polyline points="12 5 19 12 12 19"></polyline>
                     </svg>
                 </a>
+            </div>
 
-                <!-- 하단 링크 -->
-                <div class="footer-links">
-                    <a href="#terms" class="footer-link">terms of service</a>
-                    <span style="color: rgba(255, 255, 255, 0.4);">|</span>
-                    <a href="#privacy" class="footer-link">privacy policy</a>
+            <!-- 하단 링크 -->
+            <div class="footer-links">
+                <a href="#terms" class="footer-link">terms of service</a>
+                <span class="footer-separator">  |  </span>
+                <a href="#privacy" class="footer-link">privacy policy</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- About 모달 -->
+    <div class="modal-overlay" id="aboutModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div class="modal-spacer"></div>
+                <div class="modal-title-wrapper">
+                    <div class="modal-title">
+                        <span class="title-regular">What is</span>
+                        <span class="title-italic">Seoul Chess Club</span>
+                        <span class="title-regular">?</span>
+                    </div>
                 </div>
+                <div class="modal-close" id="closeModal">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </div>
+            </div>
+            <div class="modal-content">
+                <p>We expand our relationships with small, fun activities — like chess!</p>
+                <p>
+                    Meet. Play. Connect.<br>
+                    It all starts with one small move.<br>
+                    In the end, small connections keep us alive.
+                </p>
             </div>
         </div>
     </div>
 
     <script>
+        // 모달 요소
+        const aboutModal = document.getElementById('aboutModal');
+        const closeModalBtn = document.getElementById('closeModal');
+        const aboutBtn = document.querySelector('a[href="#about"]');
+
+        // About 버튼 클릭 시 모달 열기
+        aboutBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            aboutModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+
+        // X 버튼 클릭 시 모달 닫기
+        closeModalBtn.addEventListener('click', function() {
+            aboutModal.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+
+        // 모달 오버레이 클릭 시 모달 닫기
+        aboutModal.addEventListener('click', function(e) {
+            if (e.target === aboutModal) {
+                aboutModal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+
+        // ESC 키로 모달 닫기
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && aboutModal.classList.contains('active')) {
+                aboutModal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+
         // SIGN UP 버튼 클릭 시 register_form으로 이동
         document.getElementById('signupBtn').addEventListener('click', function(e) {
             e.preventDefault();
@@ -387,18 +639,6 @@
             setTimeout(() => {
                 window.location.href = '/register_form';
             }, 300);
-        });
-
-        // About 버튼 클릭 처리 (임시)
-        document.querySelector('a[href="#about"]').addEventListener('click', function(e) {
-            e.preventDefault();
-            alert('About page coming soon!');
-        });
-
-        // Contact 버튼 클릭 처리 (임시)
-        document.querySelector('a[href="#contact"]').addEventListener('click', function(e) {
-            e.preventDefault();
-            alert('Contact: contact@seoulchessclub.com');
         });
 
         // 이미지 로드 에러 처리
