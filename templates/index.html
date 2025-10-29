@@ -27,11 +27,37 @@
             overflow: hidden;
         }
 
+        .main-wrapper {
+            width: 100%;
+            max-width: 1400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+            padding: 20px;
+        }
+
+        .side-gif {
+            width: 250px;
+            height: 400px;
+            border-radius: 20px;
+            object-fit: cover;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+            box-shadow: 0 10px 30px rgba(255, 179, 253, 0.2);
+        }
+
+        .side-gif:hover {
+            opacity: 1;
+            transform: scale(1.05);
+            transition: all 0.3s ease;
+        }
+
         .container {
             width: 100%;
-            max-width: 347px;
+            max-width: 500px;
             height: 100vh;
-            max-height: 720px;
+            max-height: 800px;
             position: relative;
             display: flex;
             align-items: center;
@@ -402,6 +428,16 @@
         }
 
         /* 반응형 */
+        @media (max-width: 1200px) {
+            .side-gif {
+                display: none;
+            }
+
+            .main-wrapper {
+                gap: 0;
+            }
+        }
+
         @media (max-width: 480px) {
             .container {
                 max-width: 100%;
@@ -495,14 +531,18 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="hero-card">
-            <!-- 배경 이미지 -->
-            <img 
-                src="https://images.unsplash.com/photo-1560174038-da43ac74f01b?w=600&h=900&fit=crop&q=80" 
-                alt="Chess Community" 
-                class="hero-image"
-            >
+    <div class="main-wrapper">
+        <!-- 왼쪽 GIF -->
+        <img src="https://media.giphy.com/media/l0HlHJGHe3yAMhdQY/giphy.gif" alt="Chess Meme" class="side-gif">
+        
+        <div class="container">
+            <div class="hero-card">
+                <!-- 배경 이미지 -->
+                <img 
+                    src="https://images.unsplash.com/photo-1528819622765-d6bcf132f793?w=600&h=900&fit=crop&q=80" 
+                    alt="Chess Community" 
+                    class="hero-image"
+                >
             
             <!-- 오버레이 -->
             <div class="overlay"></div>
@@ -561,6 +601,10 @@
                 <a href="#privacy" class="footer-link">privacy policy</a>
             </div>
         </div>
+    </div>
+    
+    <!-- 오른쪽 GIF -->
+    <img src="https://media.giphy.com/media/3oEdv5e5Zd2gsczAhG/giphy.gif" alt="Chess Meme" class="side-gif">
     </div>
 
     <!-- About 모달 -->
