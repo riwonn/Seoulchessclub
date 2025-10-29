@@ -45,14 +45,16 @@
             object-fit: cover;
             opacity: 0;
             pointer-events: none;
-            z-index: 9999;
-            transition: opacity 0.5s ease, transform 0.1s ease;
+            z-index: 5;
+            transition: opacity 0.3s ease, transform 0.1s ease;
             box-shadow: 0 8px 25px rgba(255, 179, 253, 0.3);
             transform-origin: center;
+            visibility: hidden;
         }
 
         .cursor-trail.show {
             opacity: 0.7;
+            visibility: visible;
         }
 
         .cursor-trail:nth-child(1) { 
@@ -87,9 +89,9 @@
 
         .container {
             width: 100%;
-            max-width: 500px;
+            max-width: 347px;
             height: 100vh;
-            max-height: 800px;
+            max-height: 720px;
             position: relative;
             display: flex;
             align-items: center;
@@ -105,6 +107,7 @@
             position: relative;
             background: white;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            z-index: 10;
         }
 
         .hero-image {
@@ -330,6 +333,7 @@
             gap: 8px;
             font-size: 13px;
             align-items: center;
+            z-index: 20;
         }
 
         .footer-link {
@@ -359,7 +363,7 @@
             height: 100%;
             background: rgba(66, 66, 66, 0.5);
             backdrop-filter: blur(10px);
-            z-index: 100;
+            z-index: 10000;
             display: none;
             align-items: center;
             justify-content: center;
@@ -713,6 +717,7 @@
             mouseY = e.clientY;
             
             const cardRect = heroCard.getBoundingClientRect();
+            const modalOpen = document.getElementById('aboutModal').classList.contains('active');
             
             // 마우스가 카드 영역 밖에 있는지 확인
             isOutsideCard = (
@@ -722,9 +727,9 @@
                 mouseY > cardRect.bottom
             );
             
-            // Trail 표시/숨김
+            // Trail 표시/숨김 (모달이 열려있으면 무조건 숨김)
             trails.forEach(trail => {
-                if (isOutsideCard) {
+                if (isOutsideCard && !modalOpen) {
                     trail.classList.add('show');
                 } else {
                     trail.classList.remove('show');
@@ -766,6 +771,8 @@
             e.preventDefault();
             aboutModal.classList.add('active');
             document.body.style.overflow = 'hidden';
+            // 모달 열릴 때 trail 숨기기
+            trails.forEach(trail => trail.classList.remove('show'));
         });
 
         // X 버튼 클릭 시 모달 닫기
