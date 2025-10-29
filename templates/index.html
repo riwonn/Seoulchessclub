@@ -37,56 +37,6 @@
             padding: 20px;
         }
 
-        .cursor-trail {
-            position: fixed;
-            width: 120px;
-            height: 120px;
-            border-radius: 15px;
-            object-fit: cover;
-            opacity: 0;
-            pointer-events: none;
-            z-index: 5;
-            transition: opacity 0.3s ease, transform 0.1s ease;
-            box-shadow: 0 8px 25px rgba(255, 179, 253, 0.3);
-            transform-origin: center;
-            visibility: hidden;
-        }
-
-        .cursor-trail.show {
-            opacity: 0.7;
-            visibility: visible;
-        }
-
-        .cursor-trail:nth-child(1) { 
-            width: 120px; 
-            height: 120px; 
-            opacity: 0.8;
-        }
-        .cursor-trail:nth-child(2) { 
-            width: 100px; 
-            height: 100px; 
-            opacity: 0.65;
-            transition-delay: 0.05s;
-        }
-        .cursor-trail:nth-child(3) { 
-            width: 80px; 
-            height: 80px; 
-            opacity: 0.5;
-            transition-delay: 0.1s;
-        }
-        .cursor-trail:nth-child(4) { 
-            width: 60px; 
-            height: 60px; 
-            opacity: 0.35;
-            transition-delay: 0.15s;
-        }
-        .cursor-trail:nth-child(5) { 
-            width: 40px; 
-            height: 40px; 
-            opacity: 0.2;
-            transition-delay: 0.2s;
-        }
-
         .container {
             width: 100%;
             max-width: 500px;
@@ -478,12 +428,6 @@
         }
 
         @media (max-width: 480px) {
-            .cursor-trail:nth-child(1) { width: 80px; height: 80px; }
-            .cursor-trail:nth-child(2) { width: 65px; height: 65px; }
-            .cursor-trail:nth-child(3) { width: 50px; height: 50px; }
-            .cursor-trail:nth-child(4) { width: 40px; height: 40px; }
-            .cursor-trail:nth-child(5) { width: 30px; height: 30px; }
-            
             .container {
                 max-width: 100%;
                 height: 100vh;
@@ -576,9 +520,6 @@
     </style>
 </head>
 <body>
-    <!-- 마우스 커서 Trail Effect -->
-    <div id="cursorTrailContainer"></div>
-
     <div class="main-wrapper">
         <div class="container">
             <div class="hero-card">
@@ -681,86 +622,6 @@
     </div>
 
     <script>
-        // Trail Cursor Effect
-        const trailContainer = document.getElementById('cursorTrailContainer');
-        const heroCard = document.querySelector('.hero-card');
-        const trailCount = 5;
-        const trailImages = [
-            'https://media.giphy.com/media/l0HlHJGHe3yAMhdQY/giphy.gif',
-            'https://media.giphy.com/media/3oEdv5e5Zd2gsczAhG/giphy.gif',
-            'https://media.giphy.com/media/xUPGcxpCV81ebKh7Vu/giphy.gif',
-            'https://media.giphy.com/media/26u4cqiYI30juCOGY/giphy.gif',
-            'https://media.giphy.com/media/26BRBKqUiq586bRVm/giphy.gif'
-        ];
-        
-        const trails = [];
-        const positions = [];
-        
-        // Trail 이미지 생성
-        for (let i = 0; i < trailCount; i++) {
-            const trail = document.createElement('img');
-            trail.src = trailImages[i % trailImages.length];
-            trail.className = 'cursor-trail';
-            trail.alt = 'Chess Trail';
-            trailContainer.appendChild(trail);
-            trails.push(trail);
-            positions.push({ x: 0, y: 0 });
-        }
-        
-        let mouseX = 0;
-        let mouseY = 0;
-        let isOutsideCard = false;
-        
-        // 마우스 움직임 추적
-        document.addEventListener('mousemove', function(e) {
-            mouseX = e.clientX;
-            mouseY = e.clientY;
-            
-            const cardRect = heroCard.getBoundingClientRect();
-            const modalOpen = document.getElementById('aboutModal').classList.contains('active');
-            
-            // 마우스가 카드 영역 밖에 있는지 확인
-            isOutsideCard = (
-                mouseX < cardRect.left || 
-                mouseX > cardRect.right || 
-                mouseY < cardRect.top || 
-                mouseY > cardRect.bottom
-            );
-            
-            // Trail 표시/숨김 (모달이 열려있으면 무조건 숨김)
-            trails.forEach(trail => {
-                if (isOutsideCard && !modalOpen) {
-                    trail.classList.add('show');
-                } else {
-                    trail.classList.remove('show');
-                }
-            });
-        });
-        
-        // Trail 애니메이션
-        function animateTrails() {
-            // 첫 번째 trail은 마우스 위치를 직접 따라감
-            positions[0].x += (mouseX - positions[0].x) * 0.3;
-            positions[0].y += (mouseY - positions[0].y) * 0.3;
-            
-            // 나머지 trails은 이전 trail을 따라감
-            for (let i = 1; i < trailCount; i++) {
-                positions[i].x += (positions[i-1].x - positions[i].x) * 0.3;
-                positions[i].y += (positions[i-1].y - positions[i].y) * 0.3;
-            }
-            
-            // Trail 위치 업데이트
-            trails.forEach((trail, i) => {
-                const size = parseInt(getComputedStyle(trail).width);
-                trail.style.left = (positions[i].x - size / 2) + 'px';
-                trail.style.top = (positions[i].y - size / 2) + 'px';
-            });
-            
-            requestAnimationFrame(animateTrails);
-        }
-        
-        animateTrails();
-
         // 모달 요소
         const aboutModal = document.getElementById('aboutModal');
         const closeModalBtn = document.getElementById('closeModal');
@@ -771,8 +632,6 @@
             e.preventDefault();
             aboutModal.classList.add('active');
             document.body.style.overflow = 'hidden';
-            // 모달 열릴 때 trail 숨기기
-            trails.forEach(trail => trail.classList.remove('show'));
         });
 
         // X 버튼 클릭 시 모달 닫기
