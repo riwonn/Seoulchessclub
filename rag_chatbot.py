@@ -17,7 +17,8 @@ class RAGChatbot:
         
         try:
             genai.configure(api_key=self.gemini_api_key)
-            self.model = genai.GenerativeModel('gemini-1.5-flash')
+            # Use the most stable model name
+            self.model = genai.GenerativeModel('gemini-1.5-flash-latest')
             
             # 간단한 텍스트 기반 지식 베이스 로드
             self._load_knowledge_base()
