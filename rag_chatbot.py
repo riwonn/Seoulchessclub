@@ -21,7 +21,8 @@ class RAGChatbot:
             self._load_knowledge_base()
             
             self.initialized = True
-            print("✅ RAG Chatbot initialized successfully (using REST API)")
+            print(f"✅ RAG Chatbot initialized successfully (using REST API)")
+            print(f"📡 API URL: {self.api_url}")
             
         except Exception as e:
             print(f"❌ Failed to initialize RAG Chatbot: {e}")
