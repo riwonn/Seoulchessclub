@@ -92,19 +92,39 @@ class RAGChatbot:
             # 2. 컨텍스트 구성
             context = "\n\n".join(relevant_docs) if relevant_docs else "정보가 없습니다."
             
-            # 3. 프롬프트 생성
-            system_prompt = f"""당신은 Seoul Chess Club (SCC)의 친절한 고객 지원 챗봇입니다.
-아래의 지식 베이스를 참고하여 사용자의 질문에 답변해주세요.
+            # 3. 언어 감지 및 프롬프트 생성
+            # 간단한 언어 감지 (한글 문자 비율 체크)
+            korean_chars = sum(1 for c in user_message if '\uac00' <= c <= '\ud7a3')
+            total_chars = len(user_message.replace(' ', ''))
+            is_korean = (korean_chars / total_chars > 0.3) if total_chars > 0 else True
+            
+            if is_korean:
+                system_prompt = f"""당신은 Seoul Chess Club (SCC)의 친절한 고객 지원 챗봇입니다.
+아래의 지식 베이스를 참고하여 사용자의 질문에 **한국어로** 답변해주세요.
 
 지식 베이스:
 {context}
 
 답변 가이드라인:
-- 친근하고 따뜻한 톤으로 답변하세요
+- 친근하고 따뜻한 톤으로 **한국어**로 답변하세요
 - 지식 베이스에 있는 정보를 바탕으로 답변하세요
 - 모르는 정보는 솔직하게 "확실하지 않지만..." 이라고 시작하세요
 - 이모지를 적절히 사용하세요 (♟️, ✨, 🎉 등)
 - 간결하게 2-3문장으로 답변하세요
+"""
+            else:
+                system_prompt = f"""You are a friendly customer support chatbot for Seoul Chess Club (SCC).
+Please answer the user's question **in English** based on the knowledge base below.
+
+Knowledge Base:
+{context}
+
+Response Guidelines:
+- Use a friendly and warm tone in **English**
+- Base your answer on the information from the knowledge base
+- If you're unsure, start with "I'm not entirely certain, but..."
+- Use emojis appropriately (♟️, ✨, 🎉, etc.)
+- Keep answers concise, 2-3 sentences
 """
             
             # 4. REST API 요청 구성
