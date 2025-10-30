@@ -18,7 +18,7 @@
 
         body {
             font-family: 'Fustat', sans-serif;
-            background: #0d0d0d;
+            background: #1e1e1e;
             color: #ffb3fd;
             min-height: 100vh;
             display: flex;
@@ -47,7 +47,7 @@
             left: 0;
             right: 0;
             padding: 40px 20px 20px 20px;
-            background: linear-gradient(to top, #0d0d0d 70%, transparent);
+            background: linear-gradient(to top, #1e1e1e 70%, transparent);
         }
 
         .footer-content {
@@ -174,41 +174,63 @@
 
         .phone-input-wrapper {
             display: flex;
-            gap: 12px;
+            align-items: center;
+            gap: 0;
+            background-color: rgba(61, 35, 82, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 14px;
+            padding: 0;
+            overflow: hidden;
         }
 
         .country-code {
-            width: 100px;
+            width: auto;
             flex-shrink: 0;
-            padding-right: 30px;
-            background-position: right 10px center;
+            padding: 16px 12px 16px 20px;
+            border: none;
+            background: transparent;
+            border-right: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 0;
+            appearance: none;
+            background-image: none;
         }
 
         .phone-input {
             flex: 1;
+            border: none;
+            background: transparent;
+            padding: 16px 20px;
+            border-radius: 0;
+        }
+
+        .phone-input:focus {
+            box-shadow: none;
+            background: transparent;
         }
 
         button {
             font-family: 'Fustat', sans-serif;
-            width: 100%;
-            padding: 18px;
+            width: auto;
+            min-width: 120px;
+            padding: 14px 32px;
             font-size: 16px;
             font-weight: 500;
-            border: 0.75px solid rgba(255, 179, 253, 0.3);
-            border-radius: 14px;
-            background: #4d1849;
-            color: #ffb3fd;
+            border: none;
+            border-radius: 24px;
+            background: linear-gradient(135deg, #6b2d66 0%, #4a1f47 100%);
+            color: #ffffff;
             cursor: pointer;
             transition: all 0.3s ease;
-            margin-top: 10px;
+            margin-top: 24px;
             letter-spacing: 0.5px;
+            float: right;
+            clear: both;
         }
 
         button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(255, 179, 253, 0.3);
-            background: #5d1e59;
-            border-color: rgba(255, 179, 253, 0.5);
+            box-shadow: 0 8px 20px rgba(107, 45, 102, 0.4);
+            background: linear-gradient(135deg, #7a3671 0%, #5a2857 100%);
         }
 
         button:active {
@@ -220,6 +242,14 @@
             color: #9b7099;
             cursor: not-allowed;
             transform: none;
+            box-shadow: none;
+        }
+
+        .button-container {
+            width: 100%;
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 24px;
         }
 
         .consent-text {
@@ -424,18 +454,20 @@
                         type="text" 
                         id="phoneNumber" 
                         class="phone-input" 
-                        placeholder="010-1234-5678"
+                        placeholder="010-1234-1234"
                         maxlength="13"
                     >
                 </div>
             </div>
 
-            <button onclick="checkUserAndProceed()">
-                <span id="phoneButtonText">Continue</span>
-                <div class="spinner" id="phoneSpinner" style="display: none;"></div>
-            </button>
+            <div class="button-container">
+                <button onclick="checkUserAndProceed()">
+                    <span id="phoneButtonText">Continue</span>
+                    <div class="spinner" id="phoneSpinner" style="display: none;"></div>
+                </button>
+            </div>
 
-            <p class="consent-text">
+            <p class="consent-text" style="clear: both; margin-top: 30px;">
                 by continuing, you consent to receive SMS<br>
                 (text STOP to cancel anytime)
             </p>
@@ -457,7 +489,9 @@
                 </p>
             </div>
 
-            <button onclick="goToDetailsForm()">Next meeting registration</button>
+            <div class="button-container" style="margin-top: 30px;">
+                <button onclick="goToDetailsForm()" style="width: 100%;">Next meeting registration</button>
+            </div>
         </div>
 
         <!-- 화면 3: 상세 정보 입력 (#details-step) -->
@@ -551,11 +585,13 @@
                 <div class="loading" id="loading">
                     <div class="spinner"></div>
                     <p style="margin-top: 10px;">Registering...</p>
-            </div>
-            
-                <button type="submit" id="submitBtn">Sign Up</button>
+                </div>
+                
+                <div class="button-container">
+                    <button type="submit" id="submitBtn">Sign Up</button>
+                </div>
             </form>
-            </div>
+        </div>
         </div>
     </div>
 
