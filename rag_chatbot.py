@@ -18,7 +18,7 @@ class RAGChatbot:
         
         try:
             genai.configure(api_key=self.gemini_api_key)
-            self.model = genai.GenerativeModel('gemini-pro')
+            self.model = genai.GenerativeModel('gemini-1.5-flash')
             
             # ChromaDB 초기화
             self.chroma_client = chromadb.Client(Settings(
