@@ -14,7 +14,7 @@ from database import VerificationCode, SessionLocal, User, Meeting, UserMeeting,
 from schemas import SMSRequest, SMSVerify, UserCreate, UserOut, CSParseRequest, CSParseResponse, MeetingCreate, MeetingOut, UserMeetingInterest, LoginRequest, LoginResponse, AppleLoginRequest, KakaoLoginRequest, SocialLoginResponse, ChatRequest, ChatResponse
 from sqlalchemy.exc import IntegrityError # 데이터베이스 무결성 오류 처리용
 import json
-import google.generativeai as genai
+import requests
 from auth import create_access_token, get_current_user, get_current_user_optional
 from social_auth import verify_apple_token, get_kakao_user_info, extract_apple_user_info
 
@@ -39,14 +39,12 @@ if not TWILIO_ACCOUNT_SID or not TWILIO_AUTH_TOKEN or not TWILIO_PHONE_NUMBER:
 else:
     twilio_client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
 
-# Gemini API 설정
+# Gemini API 설정 (REST API 사용)
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
+
 if not GEMINI_API_KEY:
     print("WARNING: GEMINI_API_KEY environment variable is not set.")
-    genai_client = None
-else:
-    genai.configure(api_key=GEMINI_API_KEY)
-    genai_client = genai.GenerativeModel('gemini-1.5-flash')
 
 # FastAPI 앱 인스턴스 생성
 app = FastAPI(title="Community Control AI", version="1.0.0")
@@ -610,10 +608,10 @@ async def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
 async def parse_cs_text(request: CSParseRequest):
     """
     CS 텍스트를 구조화된 JSON 형태로 파싱하는 API
-    Gemini API를 사용하여 고객 문의의 의도와 엔티티를 분석합니다.
+    Gemini REST API를 사용하여 고객 문의의 의도와 엔티티를 분석합니다.
     """
     # API 키 확인
-    if not genai_client:
+    if not GEMINI_API_KEY:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Gemini API key is not configured. Please set GEMINI_API_KEY environment variable."
@@ -636,11 +634,30 @@ async def parse_cs_text(request: CSParseRequest):
         intent는 다음 중 하나여야 합니다: GREETING, QUESTION, COMPLAINT, REQUEST, COMPLIMENT, APOLOGY, THANK_YOU, GOODBYE, OTHER
         """
         
-        # Gemini API 호출
-        response = genai_client.generate_content(prompt)
+        # Gemini REST API 호출
+        payload = {
+            "contents": [{
+                "parts": [{
+                    "text": prompt
+                }]
+            }]
+        }
         
-        # 응답 텍스트에서 JSON 추출
-        response_text = response.text.strip()
+        api_response = requests.post(
+            f"{GEMINI_API_URL}?key={GEMINI_API_KEY}",
+            json=payload,
+            headers={"Content-Type": "application/json"},
+            timeout=30
+        )
+        
+        if api_response.status_code != 200:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Gemini API error: {api_response.status_code}"
+            )
+        
+        result = api_response.json()
+        response_text = result['candidates'][0]['content']['parts'][0]['text'].strip()
         
         # JSON 부분만 추출 (```json ... ``` 형태일 수 있음)
         if "```json" in response_text:

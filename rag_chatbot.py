@@ -1,5 +1,5 @@
 import os
-import google.generativeai as genai
+import requests
 from typing import List, Dict
 from dotenv import load_dotenv
 
@@ -10,21 +10,18 @@ class RAGChatbot:
         self.gemini_api_key = os.getenv("GEMINI_API_KEY")
         self.initialized = False
         self.knowledge_base = []
+        self.api_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
         
         if not self.gemini_api_key:
             print("⚠️  WARNING: GEMINI_API_KEY not found - chatbot will not work")
             return
         
         try:
-            genai.configure(api_key=self.gemini_api_key)
-            # Use v1 API with gemini-1.5-flash (supported in google-generativeai >= 1.0.0)
-            self.model = genai.GenerativeModel('gemini-1.5-flash')
-            
             # 간단한 텍스트 기반 지식 베이스 로드
             self._load_knowledge_base()
             
             self.initialized = True
-            print("✅ RAG Chatbot initialized successfully")
+            print("✅ RAG Chatbot initialized successfully (using REST API)")
             
         except Exception as e:
             print(f"❌ Failed to initialize RAG Chatbot: {e}")
@@ -83,7 +80,7 @@ class RAGChatbot:
             return []
     
     def chat(self, user_message: str, conversation_history: List[Dict] = None) -> str:
-        """RAG 기반 챗봇 응답 생성"""
+        """RAG 기반 챗봇 응답 생성 (REST API 직접 호출)"""
         if not self.initialized:
             return "죄송합니다. 챗봇 서비스가 현재 이용 불가능합니다. 관리자에게 문의해주세요."
         
@@ -109,35 +106,39 @@ class RAGChatbot:
 - 간결하게 2-3문장으로 답변하세요
 """
             
-            # 4. 대화 히스토리 구성
-            messages = []
-            if conversation_history:
-                for msg in conversation_history[-5:]:  # 최근 5개만
-                    messages.append({"role": msg["role"], "parts": [msg["content"]]})
+            # 4. REST API 요청 구성
+            full_prompt = f"{system_prompt}\n\n사용자 질문: {user_message}"
             
-            # 5. Gemini API 호출
-            chat = self.model.start_chat(history=messages)
-            response = chat.send_message(f"{system_prompt}\n\n사용자 질문: {user_message}")
+            payload = {
+                "contents": [{
+                    "parts": [{
+                        "text": full_prompt
+                    }]
+                }]
+            }
             
-            return response.text
+            # 5. Gemini REST API 호출
+            response = requests.post(
+                f"{self.api_url}?key={self.gemini_api_key}",
+                json=payload,
+                headers={"Content-Type": "application/json"},
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                if 'candidates' in result and len(result['candidates']) > 0:
+                    text = result['candidates'][0]['content']['parts'][0]['text']
+                    return text
+                else:
+                    return "죄송합니다. 응답을 생성할 수 없습니다."
+            else:
+                print(f"❌ API Error: {response.status_code} - {response.text}")
+                return f"죄송합니다. 일시적인 오류가 발생했습니다. (오류 코드: {response.status_code})"
             
         except Exception as e:
             print(f"❌ Error in chat: {e}")
-            return f"죄송합니다. 일시적인 오류가 발생했습니다. 다시 시도해주세요. 오류: {str(e)}"
-    
-    def reset_knowledge_base(self):
-        """지식 베이스 초기화 (관리자용)"""
-        try:
-            self.chroma_client.delete_collection(name="scc_knowledge")
-            self.collection = self.chroma_client.create_collection(
-                name="scc_knowledge",
-                metadata={"description": "Seoul Chess Club knowledge base"}
-            )
-            self._load_knowledge_base()
-            return True
-        except Exception as e:
-            print(f"❌ Error resetting knowledge base: {e}")
-            return False
+            return f"죄송합니다. 일시적인 오류가 발생했습니다. 다시 시도해주세요."
 
 
 # 싱글톤 인스턴스
