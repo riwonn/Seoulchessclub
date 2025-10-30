@@ -1,0 +1,73 @@
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+User _$UserFromJson(Map<String, dynamic> json) => User(
+      id: (json['id'] as num).toInt(),
+      name: json['name'] as String,
+      phoneNumber: json['phone_number'] as String,
+      email: json['email'] as String,
+      gender: json['gender'] as String,
+      birthYear: (json['birth_year'] as num?)?.toInt(),
+      chessExperience: json['chess_experience'] as String,
+      chessRating: json['chess_rating'] as String?,
+      totalVisits: (json['total_visits'] as num).toInt(),
+      createdAt: DateTime.parse(json['created_at'] as String),
+      updatedAt: DateTime.parse(json['updated_at'] as String),
+      attendedMeetings: (json['attended_meetings'] as List<dynamic>?)
+          ?.map((e) => UserMeeting.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+
+Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
+      'id': instance.id,
+      'name': instance.name,
+      'phone_number': instance.phoneNumber,
+      'email': instance.email,
+      'gender': instance.gender,
+      'birth_year': instance.birthYear,
+      'chess_experience': instance.chessExperience,
+      'chess_rating': instance.chessRating,
+      'total_visits': instance.totalVisits,
+      'created_at': instance.createdAt.toIso8601String(),
+      'updated_at': instance.updatedAt.toIso8601String(),
+      'attended_meetings': instance.attendedMeetings,
+    };
+
+UserMeeting _$UserMeetingFromJson(Map<String, dynamic> json) => UserMeeting(
+      id: (json['id'] as num).toInt(),
+      userId: (json['user_id'] as num).toInt(),
+      meetingId: (json['meeting_id'] as num).toInt(),
+      status: json['status'] as String,
+      registeredAt: DateTime.parse(json['registered_at'] as String),
+    );
+
+Map<String, dynamic> _$UserMeetingToJson(UserMeeting instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'user_id': instance.userId,
+      'meeting_id': instance.meetingId,
+      'status': instance.status,
+      'registered_at': instance.registeredAt.toIso8601String(),
+    };
+
+UserCreate _$UserCreateFromJson(Map<String, dynamic> json) => UserCreate(
+      name: json['name'] as String,
+      phoneNumber: json['phone_number'] as String,
+      email: json['email'] as String,
+      gender: json['gender'] as String,
+      birthYear: (json['birth_year'] as num?)?.toInt(),
+      chessExperience: json['chess_experience'] as String,
+      chessRating: json['chess_rating'] as String?,
+    );
+
+Map<String, dynamic> _$UserCreateToJson(UserCreate instance) =>
+    <String, dynamic>{
+      'name': instance.name,
+      'phone_number': instance.phoneNumber,
+      'email': instance.email,
+      'gender': instance.gender,
+      'birth_year': instance.birthYear,
+      'chess_experience': instance.chessExperience,
+      'chess_rating': instance.chessRating,
+    };

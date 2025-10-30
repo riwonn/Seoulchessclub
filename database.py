@@ -40,7 +40,7 @@ class User(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
-    phone_number = Column(String, nullable=False, unique=True)
+    phone_number = Column(String, nullable=True, unique=True)  # 소셜 로그인 시 null 가능
     email = Column(String, nullable=False, unique=True)
     
     # Enum이 정의되지 않았으므로 임시로 String 사용
@@ -51,6 +51,10 @@ class User(Base):
     
     # 💡 재방문 횟수 트래킹을 위해 추가
     total_visits = Column(Integer, default=1, nullable=False) 
+    
+    # 💡 소셜 로그인 정보
+    social_provider = Column(String, nullable=True)  # 'apple', 'kakao', null (일반 로그인)
+    social_id = Column(String, nullable=True, unique=True)  # 소셜 제공자의 고유 ID
     
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

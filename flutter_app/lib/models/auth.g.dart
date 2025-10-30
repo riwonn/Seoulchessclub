@@ -1,0 +1,49 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'auth.dart';
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+SMSRequest _$SMSRequestFromJson(Map<String, dynamic> json) => SMSRequest(
+      phoneNumber: json['phone_number'] as String,
+    );
+
+Map<String, dynamic> _$SMSRequestToJson(SMSRequest instance) =>
+    <String, dynamic>{
+      'phone_number': instance.phoneNumber,
+    };
+
+SMSVerify _$SMSVerifyFromJson(Map<String, dynamic> json) => SMSVerify(
+      phoneNumber: json['phone_number'] as String,
+      code: json['code'] as String,
+    );
+
+Map<String, dynamic> _$SMSVerifyToJson(SMSVerify instance) => <String, dynamic>{
+      'phone_number': instance.phoneNumber,
+      'code': instance.code,
+    };
+
+LoginRequest _$LoginRequestFromJson(Map<String, dynamic> json) => LoginRequest(
+      phoneNumber: json['phone_number'] as String,
+    );
+
+Map<String, dynamic> _$LoginRequestToJson(LoginRequest instance) =>
+    <String, dynamic>{
+      'phone_number': instance.phoneNumber,
+    };
+
+LoginResponse _$LoginResponseFromJson(Map<String, dynamic> json) =>
+    LoginResponse(
+      accessToken: json['access_token'] as String,
+      tokenType: json['token_type'] as String,
+      user: User.fromJson(json['user'] as Map<String, dynamic>),
+    );
+
+Map<String, dynamic> _$LoginResponseToJson(LoginResponse instance) =>
+    <String, dynamic>{
+      'access_token': instance.accessToken,
+      'token_type': instance.tokenType,
+      'user': instance.user,
+    };

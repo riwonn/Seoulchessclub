@@ -84,13 +84,15 @@ class UserCreate(BaseModel):
 class UserOut(BaseModel):
     id: int
     name: str
-    phone_number: str
+    phone_number: Optional[str] = None
     email: str
     gender: str
     birth_year: Optional[int] = None
     chess_experience: str
     chess_rating: Optional[str] = None
     total_visits: int
+    social_provider: Optional[str] = None
+    social_id: Optional[str] = None
     created_at: datetime
     updated_at: datetime
     attended_meetings: List[UserMeetingOut] = []  # 사용자가 참여한 모임 목록
@@ -144,3 +146,68 @@ class UserMeetingOut(BaseModel):
     
     class Config:
         from_attributes = True
+
+
+# --------------------
+# 인증 관련 스키마
+# --------------------
+class LoginRequest(BaseModel):
+    """로그인 요청 스키마 (전화번호 + SMS 인증 후 로그인)"""
+    phone_number: str
+
+
+class LoginResponse(BaseModel):
+    """로그인 응답 스키마"""
+    access_token: str
+    token_type: str = "bearer"
+    user: UserOut
+
+
+class TokenData(BaseModel):
+    """JWT 토큰 페이로드 스키마"""
+    user_id: Optional[int] = None
+    phone_number: Optional[str] = None
+
+
+# --------------------
+# 소셜 로그인 관련 스키마
+# --------------------
+class AppleLoginRequest(BaseModel):
+    """Apple 로그인 요청 스키마"""
+    identity_token: str  # Apple에서 받은 ID 토큰
+    authorization_code: str  # Apple에서 받은 인증 코드
+    user_info: Optional[dict] = None  # 첫 로그인 시 제공되는 사용자 정보
+
+
+class KakaoLoginRequest(BaseModel):
+    """카카오 로그인 요청 스키마"""
+    access_token: str  # 카카오에서 받은 액세스 토큰
+
+
+class SocialLoginResponse(BaseModel):
+    """소셜 로그인 응답 스키마"""
+    access_token: str
+    token_type: str = "bearer"
+    user: UserOut
+    is_new_user: bool  # 신규 가입 여부
+
+
+# --------------------
+# 챗봇 관련 스키마
+# --------------------
+class ChatMessage(BaseModel):
+    """챗봇 메시지 스키마"""
+    role: str  # "user" or "assistant"
+    content: str
+
+
+class ChatRequest(BaseModel):
+    """챗봇 요청 스키마"""
+    message: str
+    conversation_history: List[ChatMessage] = []
+
+
+class ChatResponse(BaseModel):
+    """챗봇 응답 스키마"""
+    response: str
+    timestamp: datetime

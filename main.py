@@ -11,10 +11,12 @@ import random
 from dotenv import load_dotenv
 from sqlalchemy.orm import Session, joinedload
 from database import VerificationCode, SessionLocal, User, Meeting, UserMeeting, get_db, init_db
-from schemas import SMSRequest, SMSVerify, UserCreate, UserOut, CSParseRequest, CSParseResponse, MeetingCreate, MeetingOut, UserMeetingInterest
+from schemas import SMSRequest, SMSVerify, UserCreate, UserOut, CSParseRequest, CSParseResponse, MeetingCreate, MeetingOut, UserMeetingInterest, LoginRequest, LoginResponse, AppleLoginRequest, KakaoLoginRequest, SocialLoginResponse, ChatRequest, ChatResponse
 from sqlalchemy.exc import IntegrityError # 데이터베이스 무결성 오류 처리용
 import json
 import google.generativeai as genai
+from auth import create_access_token, get_current_user, get_current_user_optional
+from social_auth import verify_apple_token, get_kakao_user_info, extract_apple_user_info
 
 # .env 파일 로드
 load_dotenv()
@@ -285,6 +287,240 @@ async def verify_sms(request: SMSVerify, db: Session = Depends(get_db)):
 
 
 # =========================================================================
+# 💡 2-1. 로그인 엔드포인트 (JWT 토큰 발급)
+# =========================================================================
+@app.post("/auth/login", response_model=LoginResponse)
+async def login(request: LoginRequest, db: Session = Depends(get_db)):
+    """
+    로그인 API (전화번호 기반)
+    
+    SMS 인증이 완료된 후, 전화번호로 로그인하여 JWT 토큰을 발급받습니다.
+    사용자가 존재하지 않으면 404 에러를 반환합니다.
+    
+    Args:
+        request: 전화번호를 포함한 로그인 요청
+        db: 데이터베이스 세션
+    
+    Returns:
+        JWT 액세스 토큰과 사용자 정보
+    """
+    # 1. 전화번호로 사용자 조회
+    user = db.query(User).options(joinedload(User.meetings)).filter(
+        User.phone_number == request.phone_number
+    ).first()
+    
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found. Please register first."
+        )
+    
+    # 2. JWT 토큰 생성
+    access_token = create_access_token(
+        data={
+            "user_id": user.id,
+            "phone_number": user.phone_number
+        }
+    )
+    
+    # 3. 로그인 응답 반환
+    return LoginResponse(
+        access_token=access_token,
+        token_type="bearer",
+        user=user
+    )
+
+
+@app.get("/auth/me", response_model=UserOut)
+async def get_current_user_info(current_user: User = Depends(get_current_user)):
+    """
+    현재 로그인한 사용자 정보 조회 API
+    
+    JWT 토큰을 통해 인증된 사용자의 정보를 반환합니다.
+    Authorization 헤더에 "Bearer {token}" 형식으로 토큰을 포함해야 합니다.
+    
+    Args:
+        current_user: 인증된 사용자 (의존성 주입)
+    
+    Returns:
+        사용자 정보
+    """
+    return current_user
+
+
+# =========================================================================
+# 💡 2-2. 소셜 로그인 엔드포인트 (Apple, Kakao)
+# =========================================================================
+@app.post("/auth/apple", response_model=SocialLoginResponse)
+async def apple_login(request: AppleLoginRequest, db: Session = Depends(get_db)):
+    """
+    Apple 로그인 API
+    
+    Apple Sign In을 통해 받은 ID 토큰을 검증하고 사용자를 생성/로그인합니다.
+    
+    Args:
+        request: Apple 로그인 요청 (identity_token, authorization_code)
+        db: 데이터베이스 세션
+    
+    Returns:
+        JWT 액세스 토큰과 사용자 정보
+    """
+    try:
+        # 1. Apple ID 토큰 검증
+        decoded_token = await verify_apple_token(request.identity_token)
+        
+        # 2. 사용자 정보 추출
+        user_info = extract_apple_user_info(decoded_token, request.user_info)
+        apple_id = user_info["id"]
+        email = user_info["email"]
+        name = user_info["name"]
+        
+        # 3. 기존 사용자 확인 (Apple ID로)
+        existing_user = db.query(User).filter(
+            User.social_provider == "apple",
+            User.social_id == apple_id
+        ).first()
+        
+        is_new_user = False
+        
+        if existing_user:
+            # 기존 사용자: total_visits 증가
+            existing_user.total_visits += 1
+            existing_user.updated_at = datetime.utcnow()
+            db.commit()
+            db.refresh(existing_user)
+            user = existing_user
+        else:
+            # 신규 사용자: 기본 정보로 회원 생성
+            is_new_user = True
+            new_user = User(
+                name=name,
+                email=email,
+                phone_number=None,  # Apple 로그인은 전화번호 없음
+                gender="OTHER",  # 기본값
+                chess_experience="NO_BUT_WANT_TO_LEARN",  # 기본값
+                social_provider="apple",
+                social_id=apple_id,
+                total_visits=1
+            )
+            
+            db.add(new_user)
+            db.commit()
+            db.refresh(new_user)
+            user = new_user
+        
+        # 4. JWT 토큰 생성
+        access_token = create_access_token(
+            data={
+                "user_id": user.id,
+                "email": user.email,
+                "social_provider": "apple"
+            }
+        )
+        
+        return SocialLoginResponse(
+            access_token=access_token,
+            token_type="bearer",
+            user=user,
+            is_new_user=is_new_user
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Apple login failed: {str(e)}"
+        )
+
+
+@app.post("/auth/kakao", response_model=SocialLoginResponse)
+async def kakao_login(request: KakaoLoginRequest, db: Session = Depends(get_db)):
+    """
+    카카오 로그인 API
+    
+    카카오 로그인을 통해 받은 액세스 토큰으로 사용자 정보를 조회하고 생성/로그인합니다.
+    
+    Args:
+        request: 카카오 로그인 요청 (access_token)
+        db: 데이터베이스 세션
+    
+    Returns:
+        JWT 액세스 토큰과 사용자 정보
+    """
+    try:
+        # 1. 카카오 API로 사용자 정보 조회
+        user_info = await get_kakao_user_info(request.access_token)
+        kakao_id = user_info["id"]
+        email = user_info.get("email")
+        name = user_info.get("name", "카카오 사용자")
+        
+        # 이메일이 없는 경우 기본 이메일 생성
+        if not email:
+            email = f"kakao_{kakao_id}@kakao.local"
+        
+        # 2. 기존 사용자 확인 (Kakao ID로)
+        existing_user = db.query(User).filter(
+            User.social_provider == "kakao",
+            User.social_id == kakao_id
+        ).first()
+        
+        is_new_user = False
+        
+        if existing_user:
+            # 기존 사용자: total_visits 증가
+            existing_user.total_visits += 1
+            existing_user.updated_at = datetime.utcnow()
+            db.commit()
+            db.refresh(existing_user)
+            user = existing_user
+        else:
+            # 신규 사용자: 기본 정보로 회원 생성
+            is_new_user = True
+            new_user = User(
+                name=name,
+                email=email,
+                phone_number=None,  # 카카오 로그인은 전화번호 없음
+                gender="OTHER",  # 기본값
+                chess_experience="NO_BUT_WANT_TO_LEARN",  # 기본값
+                social_provider="kakao",
+                social_id=kakao_id,
+                total_visits=1
+            )
+            
+            db.add(new_user)
+            db.commit()
+            db.refresh(new_user)
+            user = new_user
+        
+        # 3. JWT 토큰 생성
+        access_token = create_access_token(
+            data={
+                "user_id": user.id,
+                "email": user.email,
+                "social_provider": "kakao"
+            }
+        )
+        
+        return SocialLoginResponse(
+            access_token=access_token,
+            token_type="bearer",
+            user=user,
+            is_new_user=is_new_user
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Kakao login failed: {str(e)}"
+        )
+
+
+# =========================================================================
 # 💡 3. 사용자 등록 엔드포인트 (/register)
 # =========================================================================
 @app.post("/register", response_model=UserOut, status_code=status.HTTP_201_CREATED)
@@ -474,19 +710,26 @@ async def get_all_meetings(db: Session = Depends(get_db)):
 
 
 @app.post("/meetings/register", status_code=status.HTTP_201_CREATED)
-async def register_for_meeting(user_id: int, meeting_id: int, db: Session = Depends(get_db)):
+async def register_for_meeting(
+    meeting_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """
-    모임 참가 신청 API.
-    user_id와 meeting_id를 받아 UserMeeting 테이블에 참가 기록을 생성합니다.
+    모임 참가 신청 API (인증 필요).
+    
+    JWT 토큰으로 인증된 사용자가 지정된 모임에 참가 신청합니다.
+    user_id는 토큰에서 자동으로 추출됩니다.
+    
+    Args:
+        meeting_id: 참가할 모임 ID
+        current_user: 인증된 사용자 (토큰에서 자동 추출)
+        db: 데이터베이스 세션
     """
     try:
-        # 1. 사용자 존재 확인
-        user = db.query(User).filter(User.id == user_id).first()
-        if not user:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"User with id {user_id} not found"
-            )
+        user_id = current_user.id
+        
+        # 1. 사용자는 이미 인증되어 current_user로 제공됨
         
         # 2. 모임 존재 확인
         meeting = db.query(Meeting).filter(Meeting.id == meeting_id).first()
@@ -562,33 +805,39 @@ async def register_for_meeting(user_id: int, meeting_id: int, db: Session = Depe
 
 
 @app.post("/meetings/register_interest", status_code=status.HTTP_201_CREATED)
-async def register_interest_for_meeting(interest_data: UserMeetingInterest, db: Session = Depends(get_db)):
+async def register_interest_for_meeting(
+    meeting_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """
-    모임 관심 등록 API (결제 의사 표시).
-    user_id와 meeting_id를 받아 UserMeeting 테이블에 status='PENDING'으로 기록을 생성합니다.
-    최종 확인 전 '신청 중' 상태로 등록하는 역할을 합니다.
+    모임 관심 등록 API (인증 필요, 결제 의사 표시).
+    
+    JWT 토큰으로 인증된 사용자가 모임에 관심을 등록합니다.
+    status='PENDING'으로 기록을 생성하여 최종 확인 전 '신청 중' 상태로 등록합니다.
+    
+    Args:
+        meeting_id: 관심 등록할 모임 ID
+        current_user: 인증된 사용자 (토큰에서 자동 추출)
+        db: 데이터베이스 세션
     """
     try:
-        # 1. 사용자 존재 확인
-        user = db.query(User).filter(User.id == interest_data.user_id).first()
-        if not user:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"User with id {interest_data.user_id} not found"
-            )
+        user_id = current_user.id
+        
+        # 1. 사용자는 이미 인증되어 current_user로 제공됨
         
         # 2. 모임 존재 확인
-        meeting = db.query(Meeting).filter(Meeting.id == interest_data.meeting_id).first()
+        meeting = db.query(Meeting).filter(Meeting.id == meeting_id).first()
         if not meeting:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Meeting with id {interest_data.meeting_id} not found"
+                detail=f"Meeting with id {meeting_id} not found"
             )
         
         # 3. 이미 관심 등록 또는 참가 신청했는지 확인
         existing_interest = db.query(UserMeeting).filter(
-            UserMeeting.user_id == interest_data.user_id,
-            UserMeeting.meeting_id == interest_data.meeting_id
+            UserMeeting.user_id == user_id,
+            UserMeeting.meeting_id == meeting_id
         ).first()
         
         if existing_interest:
@@ -611,14 +860,14 @@ async def register_interest_for_meeting(interest_data: UserMeetingInterest, db: 
                 return {
                     "message": "Meeting interest reactivated successfully",
                     "registration_id": existing_interest.id,
-                    "user_id": interest_data.user_id,
-                    "meeting_id": interest_data.meeting_id,
+                    "user_id": user_id,
+                    "meeting_id": meeting_id,
                     "status": "PENDING"
                 }
         
         # 4. 모임 정원 확인 (CONFIRMED + PENDING 상태 합산)
         current_participants = db.query(UserMeeting).filter(
-            UserMeeting.meeting_id == interest_data.meeting_id,
+            UserMeeting.meeting_id == meeting_id,
             UserMeeting.status.in_(["CONFIRMED", "PENDING"])
         ).count()
         
@@ -630,8 +879,8 @@ async def register_interest_for_meeting(interest_data: UserMeetingInterest, db: 
         
         # 5. 새로운 관심 등록 기록 생성 (status='PENDING')
         new_interest = UserMeeting(
-            user_id=interest_data.user_id,
-            meeting_id=interest_data.meeting_id,
+            user_id=user_id,
+            meeting_id=meeting_id,
             status="PENDING",
             registered_at=datetime.utcnow()
         )
@@ -643,8 +892,8 @@ async def register_interest_for_meeting(interest_data: UserMeetingInterest, db: 
         return {
             "message": "Meeting interest registered successfully",
             "registration_id": new_interest.id,
-            "user_id": interest_data.user_id,
-            "meeting_id": interest_data.meeting_id,
+            "user_id": user_id,
+            "meeting_id": meeting_id,
             "status": new_interest.status
         }
         
@@ -656,4 +905,51 @@ async def register_interest_for_meeting(interest_data: UserMeetingInterest, db: 
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error registering interest for meeting: {str(e)}"
+        )
+
+
+# --------------------
+# 챗봇 API (RAG 기반 LLM)
+# --------------------
+from rag_chatbot import get_chatbot
+
+@app.post("/api/chat", response_model=ChatResponse)
+async def chat_with_bot(
+    request: ChatRequest,
+    current_user: User = Depends(get_current_user_optional)
+):
+    """
+    RAG 기반 챗봇 API
+    
+    Args:
+        request: 챗봇 요청 (메시지 + 대화 히스토리)
+        current_user: 인증된 사용자 (선택)
+    
+    Returns:
+        챗봇 응답
+    """
+    try:
+        chatbot = get_chatbot()
+        
+        # 대화 히스토리 변환
+        conversation_history = [
+            {"role": msg.role, "content": msg.content}
+            for msg in request.conversation_history
+        ]
+        
+        # 챗봇 응답 생성
+        response_text = chatbot.chat(
+            user_message=request.message,
+            conversation_history=conversation_history
+        )
+        
+        return ChatResponse(
+            response=response_text,
+            timestamp=datetime.utcnow()
+        )
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Chatbot error: {str(e)}"
         )
