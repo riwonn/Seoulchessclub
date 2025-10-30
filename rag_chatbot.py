@@ -1,6 +1,4 @@
 import os
-import chromadb
-from chromadb.config import Settings
 import google.generativeai as genai
 from typing import List, Dict
 from dotenv import load_dotenv
@@ -11,6 +9,7 @@ class RAGChatbot:
     def __init__(self):
         self.gemini_api_key = os.getenv("GEMINI_API_KEY")
         self.initialized = False
+        self.knowledge_base = []
         
         if not self.gemini_api_key:
             print("⚠️  WARNING: GEMINI_API_KEY not found - chatbot will not work")
@@ -20,26 +19,8 @@ class RAGChatbot:
             genai.configure(api_key=self.gemini_api_key)
             self.model = genai.GenerativeModel('gemini-1.5-flash')
             
-            # ChromaDB 초기화 (production 환경에서는 /tmp 사용)
-            persist_dir = "./chroma_db" if os.getenv("RAILWAY_ENVIRONMENT") != "production" else "/tmp/chroma_db"
-            print(f"📦 ChromaDB persist directory: {persist_dir}")
-            
-            self.chroma_client = chromadb.Client(Settings(
-                anonymized_telemetry=False,
-                is_persistent=True,
-                persist_directory=persist_dir
-            ))
-            
-            # 컬렉션 생성 또는 가져오기
-            try:
-                self.collection = self.chroma_client.get_collection(name="scc_knowledge")
-                print("✅ Loaded existing knowledge base")
-            except:
-                self.collection = self.chroma_client.create_collection(
-                    name="scc_knowledge",
-                    metadata={"description": "Seoul Chess Club knowledge base"}
-                )
-                self._load_knowledge_base()
+            # 간단한 텍스트 기반 지식 베이스 로드
+            self._load_knowledge_base()
             
             self.initialized = True
             print("✅ RAG Chatbot initialized successfully")
@@ -49,46 +30,53 @@ class RAGChatbot:
             self.initialized = False
     
     def _load_knowledge_base(self):
-        """지식 베이스 파일을 읽어서 ChromaDB에 저장"""
+        """지식 베이스 파일을 읽어서 메모리에 저장 (간단한 텍스트 검색용)"""
         try:
             with open("knowledge_base.txt", "r", encoding="utf-8") as f:
                 content = f.read()
             
             # 섹션별로 분할
             sections = content.split("\n##")
-            documents = []
-            metadatas = []
-            ids = []
             
             for i, section in enumerate(sections):
                 if section.strip():
-                    # Gemini로 임베딩 생성
-                    documents.append(section.strip())
-                    metadatas.append({"source": "knowledge_base.txt", "section": i})
-                    ids.append(f"doc_{i}")
+                    self.knowledge_base.append({
+                        'id': i,
+                        'content': section.strip(),
+                        'content_lower': section.strip().lower()
+                    })
             
-            # ChromaDB에 저장
-            if documents:
-                self.collection.add(
-                    documents=documents,
-                    metadatas=metadatas,
-                    ids=ids
-                )
-                print(f"✅ Loaded {len(documents)} documents into knowledge base")
+            print(f"✅ Loaded {len(self.knowledge_base)} documents into knowledge base")
         except Exception as e:
             print(f"❌ Error loading knowledge base: {e}")
     
     def _search_knowledge(self, query: str, top_k: int = 3) -> List[str]:
-        """쿼리와 관련된 문서 검색"""
+        """쿼리와 관련된 문서 검색 (간단한 키워드 매칭)"""
         try:
-            results = self.collection.query(
-                query_texts=[query],
-                n_results=top_k
-            )
+            query_lower = query.lower()
+            query_words = set(query_lower.split())
             
-            if results and results['documents']:
-                return results['documents'][0]
-            return []
+            # 각 문서에 대해 매칭 점수 계산
+            scored_docs = []
+            for doc in self.knowledge_base:
+                doc_words = set(doc['content_lower'].split())
+                
+                # 공통 단어 수 계산
+                common_words = query_words.intersection(doc_words)
+                score = len(common_words)
+                
+                # 키워드 부분 매칭
+                for word in query_words:
+                    if word in doc['content_lower']:
+                        score += 2  # 부분 매칭에 가중치
+                
+                if score > 0:
+                    scored_docs.append((score, doc['content']))
+            
+            # 점수 순으로 정렬하고 상위 top_k 반환
+            scored_docs.sort(reverse=True, key=lambda x: x[0])
+            return [doc for score, doc in scored_docs[:top_k]]
+            
         except Exception as e:
             print(f"❌ Error searching knowledge: {e}")
             return []
