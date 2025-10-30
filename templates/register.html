@@ -181,18 +181,34 @@
             border-radius: 14px;
             padding: 0;
             overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .phone-input-wrapper:focus-within {
+            border-color: rgba(255, 255, 255, 0.3);
+            background-color: rgba(61, 35, 82, 0.6);
+            box-shadow: 0 0 0 3px rgba(232, 164, 216, 0.15);
         }
 
         .country-code {
             width: auto;
             flex-shrink: 0;
             padding: 16px 12px 16px 20px;
-            border: none;
-            background: transparent;
-            border-right: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 0;
-            appearance: none;
-            background-image: none;
+            border: none !important;
+            background: transparent !important;
+            border-right: 1px solid rgba(255, 255, 255, 0.15) !important;
+            border-radius: 0 !important;
+            appearance: none !important;
+            background-image: none !important;
+            cursor: pointer;
+        }
+        
+        .country-code:focus {
+            outline: none;
+            box-shadow: none !important;
+            border: none !important;
+            border-right: 1px solid rgba(255, 255, 255, 0.15) !important;
+            background: transparent !important;
         }
 
         .phone-input {
@@ -690,6 +706,13 @@
             }
         }
 
+        // 화면 전환 함수 (히스토리 지원)
+        function switchScreen(fromScreen, toScreen, state) {
+            document.getElementById(fromScreen)?.classList.remove('active');
+            document.getElementById(toScreen)?.classList.add('active');
+            history.pushState({ screen: toScreen }, '', '');
+        }
+
         // 2단계 A: 환영 화면 표시 (재방문 고객)
         function showWelcomeScreen() {
             // 환영 메시지 업데이트
@@ -697,23 +720,21 @@
             document.getElementById('totalVisits').textContent = existingUser.total_visits || 0;
 
             // 화면 전환
-            document.getElementById('phoneScreen').classList.remove('active');
-            document.getElementById('welcomeScreen').classList.add('active');
+            switchScreen('phoneScreen', 'welcomeScreen', { type: 'welcome' });
         }
 
         // 2단계 B: 상세 정보 입력 화면 표시 (신규 고객)
         function showDetailsForm() {
-            document.getElementById('phoneScreen').classList.remove('active');
-            document.getElementById('detailsScreen').classList.add('active');
-
             // 숨겨진 필드에 전화번호 설정
             document.getElementById('finalPhoneNumber').value = userPhoneNumber;
+            
+            // 화면 전환
+            switchScreen('phoneScreen', 'detailsScreen', { type: 'details' });
         }
 
         // 3단계: 환영 화면에서 상세 정보 입력 화면으로 이동 (재방문 고객)
         function goToDetailsForm() {
-            document.getElementById('welcomeScreen').classList.remove('active');
-            document.getElementById('detailsScreen').classList.add('active');
+            switchScreen('welcomeScreen', 'detailsScreen', { type: 'details' });
 
             // 기존 사용자 정보로 폼 미리 채우기
             if (existingUser) {
@@ -845,6 +866,30 @@
                 submitBtn.disabled = false;
                 loading.classList.remove('show');
             }
+        });
+
+        // 뒤로가기 버튼 핸들러
+        window.addEventListener('popstate', function(event) {
+            if (event.state && event.state.screen) {
+                // 모든 화면 숨기기
+                document.querySelectorAll('.screen').forEach(screen => {
+                    screen.classList.remove('active');
+                });
+                
+                // 해당 화면 표시
+                document.getElementById(event.state.screen)?.classList.add('active');
+            } else {
+                // state가 없으면 첫 화면으로
+                document.querySelectorAll('.screen').forEach(screen => {
+                    screen.classList.remove('active');
+                });
+                document.getElementById('phoneScreen')?.classList.add('active');
+            }
+        });
+
+        // 페이지 로드 시 초기 state 설정
+        window.addEventListener('load', function() {
+            history.replaceState({ screen: 'phoneScreen' }, '', '');
         });
     </script>
 </body>

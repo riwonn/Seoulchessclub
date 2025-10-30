@@ -10,28 +10,40 @@ load_dotenv()
 class RAGChatbot:
     def __init__(self):
         self.gemini_api_key = os.getenv("GEMINI_API_KEY")
+        self.initialized = False
+        
         if not self.gemini_api_key:
-            raise ValueError("GEMINI_API_KEY not found in environment variables")
+            print("⚠️  WARNING: GEMINI_API_KEY not found - chatbot will not work")
+            return
         
-        genai.configure(api_key=self.gemini_api_key)
-        self.model = genai.GenerativeModel('gemini-pro')
-        
-        # ChromaDB 초기화
-        self.chroma_client = chromadb.Client(Settings(
-            anonymized_telemetry=False,
-            is_persistent=True,
-            persist_directory="./chroma_db"
-        ))
-        
-        # 컬렉션 생성 또는 가져오기
         try:
-            self.collection = self.chroma_client.get_collection(name="scc_knowledge")
-        except:
-            self.collection = self.chroma_client.create_collection(
-                name="scc_knowledge",
-                metadata={"description": "Seoul Chess Club knowledge base"}
-            )
-            self._load_knowledge_base()
+            genai.configure(api_key=self.gemini_api_key)
+            self.model = genai.GenerativeModel('gemini-pro')
+            
+            # ChromaDB 초기화
+            self.chroma_client = chromadb.Client(Settings(
+                anonymized_telemetry=False,
+                is_persistent=True,
+                persist_directory="./chroma_db"
+            ))
+            
+            # 컬렉션 생성 또는 가져오기
+            try:
+                self.collection = self.chroma_client.get_collection(name="scc_knowledge")
+                print("✅ Loaded existing knowledge base")
+            except:
+                self.collection = self.chroma_client.create_collection(
+                    name="scc_knowledge",
+                    metadata={"description": "Seoul Chess Club knowledge base"}
+                )
+                self._load_knowledge_base()
+            
+            self.initialized = True
+            print("✅ RAG Chatbot initialized successfully")
+            
+        except Exception as e:
+            print(f"❌ Failed to initialize RAG Chatbot: {e}")
+            self.initialized = False
     
     def _load_knowledge_base(self):
         """지식 베이스 파일을 읽어서 ChromaDB에 저장"""
@@ -80,6 +92,9 @@ class RAGChatbot:
     
     def chat(self, user_message: str, conversation_history: List[Dict] = None) -> str:
         """RAG 기반 챗봇 응답 생성"""
+        if not self.initialized:
+            return "죄송합니다. 챗봇 서비스가 현재 이용 불가능합니다. 관리자에게 문의해주세요."
+        
         try:
             # 1. 관련 지식 검색
             relevant_docs = self._search_knowledge(user_message)

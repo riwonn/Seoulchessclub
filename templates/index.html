@@ -1013,9 +1013,15 @@
                 conversationHistory.push({ role: 'assistant', content: data.response });
                 
             } catch (error) {
-                console.error('Error:', error);
+                console.error('Chatbot Error:', error);
                 hideTypingIndicator();
-                addMessage('Sorry, a temporary error occurred. Please try again. 🙏', 'assistant');
+                
+                // 더 자세한 에러 메시지
+                let errorMsg = '죄송합니다. 현재 챗봇 서비스에 일시적인 문제가 있습니다. 잠시 후 다시 시도해주세요. 🙏';
+                
+                // 이메일로 문의 링크 추가
+                addMessage(errorMsg, 'assistant');
+                
             } finally {
                 chatbotSend.disabled = false;
                 chatbotInput.focus();
