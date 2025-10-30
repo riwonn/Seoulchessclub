@@ -46,7 +46,7 @@ if not GEMINI_API_KEY:
     genai_client = None
 else:
     genai.configure(api_key=GEMINI_API_KEY)
-    genai_client = genai.GenerativeModel('gemini-pro')
+    genai_client = genai.GenerativeModel('models/gemini-pro')
 
 # FastAPI 앱 인스턴스 생성
 app = FastAPI(title="Community Control AI", version="1.0.0")
