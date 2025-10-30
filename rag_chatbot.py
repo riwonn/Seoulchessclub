@@ -10,7 +10,7 @@ class RAGChatbot:
         self.gemini_api_key = os.getenv("GEMINI_API_KEY")
         self.initialized = False
         self.knowledge_base = []
-        self.api_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
+        self.api_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent"
         
         if not self.gemini_api_key:
             print("⚠️  WARNING: GEMINI_API_KEY not found - chatbot will not work")
