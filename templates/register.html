@@ -838,7 +838,7 @@
                 
                 if (response.ok) {
                     // 성공
-                    successMessage.textContent = '회원가입이 완료되었습니다! 모임 목록으로 이동합니다... 🎉';
+                    successMessage.textContent = 'Signed up successfully!🎉';
                     successMessage.classList.add('show');
                     
                     // 폼 초기화
@@ -854,12 +854,12 @@
                     }, 2000);
                 } else {
                     // 오류
-                    registerError.textContent = data.detail || '회원가입 중 오류가 발생했습니다.';
+                    registerError.textContent = data.detail || 'Registration failed. Please try again.';
                     registerError.classList.add('show');
                 }
             } catch (error) {
                 console.error('Registration error:', error);
-                registerError.textContent = '서버와 통신 중 오류가 발생했습니다. 다시 시도해주세요.';
+                registerError.textContent = 'Communication error. Please try again.';
                 registerError.classList.add('show');
             } finally {
                 // 로딩 종료

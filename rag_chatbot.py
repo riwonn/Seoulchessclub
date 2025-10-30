@@ -20,11 +20,14 @@ class RAGChatbot:
             genai.configure(api_key=self.gemini_api_key)
             self.model = genai.GenerativeModel('gemini-1.5-flash')
             
-            # ChromaDB 초기화
+            # ChromaDB 초기화 (production 환경에서는 /tmp 사용)
+            persist_dir = "./chroma_db" if os.getenv("RAILWAY_ENVIRONMENT") != "production" else "/tmp/chroma_db"
+            print(f"📦 ChromaDB persist directory: {persist_dir}")
+            
             self.chroma_client = chromadb.Client(Settings(
                 anonymized_telemetry=False,
                 is_persistent=True,
-                persist_directory="./chroma_db"
+                persist_directory=persist_dir
             ))
             
             # 컬렉션 생성 또는 가져오기

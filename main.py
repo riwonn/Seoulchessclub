@@ -74,12 +74,30 @@ async def startup_event():
         print(f"  - RAILWAY_ENVIRONMENT: {os.getenv('RAILWAY_ENVIRONMENT', 'Not set')}")
         print(f"  - RAILWAY_STATIC_URL: {os.getenv('RAILWAY_STATIC_URL', 'Not set')}")
         print(f"  - PORT: {os.getenv('PORT', 'Not set')}")
+        print(f"  - GEMINI_API_KEY: {'Set ✅' if os.getenv('GEMINI_API_KEY') else 'Not set ❌'}")
         print(f"  - Static dir exists: {os.path.exists('static')}")
         print(f"  - Templates dir exists: {os.path.exists('templates')}")
+        print(f"  - knowledge_base.txt exists: {os.path.exists('knowledge_base.txt')}")
         print("=" * 60)
         init_db()
         print("✅ Database initialized successfully!")
         print("=" * 60)
+        
+        # 챗봇 초기화 (startup 시 문제를 바로 확인하기 위해)
+        print("🤖 Initializing RAG Chatbot...")
+        try:
+            from rag_chatbot import get_chatbot
+            chatbot = get_chatbot()
+            if chatbot and hasattr(chatbot, 'initialized') and chatbot.initialized:
+                print("✅ RAG Chatbot initialized successfully!")
+            else:
+                print("⚠️  RAG Chatbot initialization incomplete - check GEMINI_API_KEY")
+        except Exception as chatbot_error:
+            print(f"❌ RAG Chatbot initialization failed: {chatbot_error}")
+            import traceback
+            traceback.print_exc()
+        print("=" * 60)
+        
     except Exception as e:
         print(f"❌ Error during startup: {str(e)}")
         import traceback
