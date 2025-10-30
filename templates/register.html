@@ -22,16 +22,54 @@
             color: #ffb3fd;
             min-height: 100vh;
             display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .main-wrapper {
+            flex: 1;
+            display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 40px 20px 100px 20px;
         }
 
         .container {
             width: 100%;
-            max-width: 380px;
+            max-width: 411px;
             margin: 0 auto;
             position: relative;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 40px 20px 20px 20px;
+            background: linear-gradient(to top, #0d0d0d 70%, transparent);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .footer-text {
+            font-size: 13px;
+            color: rgba(232, 212, 240, 0.6);
+            font-weight: 400;
+        }
+
+        .footer-text a {
+            color: rgba(232, 212, 240, 0.6);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer-text a:hover {
+            color: rgba(232, 212, 240, 0.9);
         }
 
         .screen {
@@ -56,21 +94,21 @@
 
         h1 {
             font-family: 'Instrument Serif', serif;
-            font-size: 32px;
+            font-size: 36px;
             font-weight: 400;
-            margin-bottom: 30px;
-            letter-spacing: 0;
+            margin-bottom: 20px;
+            letter-spacing: -0.5px;
             color: #ffb3fd;
+            line-height: 1.2;
         }
 
         .description {
             font-family: 'Fustat', sans-serif;
             font-style: normal;
-            font-size: 17px;
-            line-height: 1.6;
+            font-size: 15px;
+            line-height: 1.7;
             margin-bottom: 40px;
-            color: #ffbffd;
-            opacity: 0.9;
+            color: rgba(255, 191, 253, 0.85);
             font-weight: 400;
         }
 
@@ -151,10 +189,10 @@
         }
 
         button {
-            font-family: 'Instrument Serif', serif;
+            font-family: 'Fustat', sans-serif;
             width: 100%;
             padding: 18px;
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 500;
             border: 0.75px solid rgba(255, 179, 253, 0.3);
             border-radius: 14px;
@@ -163,8 +201,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             margin-top: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
         }
 
         button:hover {
@@ -322,6 +359,28 @@
             }
         }
 
+        @media (max-width: 768px) {
+            .main-wrapper {
+                padding: 20px 16px 100px 16px;
+            }
+
+            .container {
+                max-width: 347px;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+
+            .description {
+                font-size: 15px;
+            }
+
+            .footer-text {
+                font-size: 11px;
+            }
+        }
+
         @media (max-width: 480px) {
             .container {
                 max-width: 100%;
@@ -332,25 +391,23 @@
             }
 
             .description {
-                font-size: 16px;
+                font-size: 14px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- 화면 1: 전화번호 입력 (#phone-step) -->
-        <div id="phoneScreen" class="screen active">
-            <h1>Welcome to SCC.</h1>
-            <p class="description">
-                SCC helps you meet new people,<br>
-                discover your city, & deepen<br>
-                your relationships.
-            </p>
-
-            <p class="description" style="margin-top: 20px; margin-bottom: 30px; font-size: 16px;">
-                enter your phone number to get started.
-            </p>
+    <div class="main-wrapper">
+        <div class="container">
+            <!-- 화면 1: 전화번호 입력 (#phone-step) -->
+            <div id="phoneScreen" class="screen active">
+                <h1>Welcome to SCC</h1>
+                <p class="description">
+                    Meet. Play. Connect.<br>
+                    It all starts with one small move.<br>
+                    In the end, small connections keep us alive.<br><br>
+                    enter your phone number to get started.
+                </p>
 
             <div class="error-message" id="phoneError"></div>
 
@@ -374,7 +431,7 @@
             </div>
 
             <button onclick="checkUserAndProceed()">
-                <span id="phoneButtonText">CONTINUE</span>
+                <span id="phoneButtonText">Continue</span>
                 <div class="spinner" id="phoneSpinner" style="display: none;"></div>
             </button>
 
@@ -405,9 +462,9 @@
 
         <!-- 화면 3: 상세 정보 입력 (#details-step) -->
         <div id="detailsScreen" class="screen">
-            <h1>tell us about yourself</h1>
+            <h1>Tell us about yourself</h1>
             <p class="description">
-                share your details to join the community
+                Share your details to join the community.
             </p>
 
             <div class="error-message" id="registerError"></div>
@@ -496,9 +553,19 @@
                     <p style="margin-top: 10px;">Registering...</p>
             </div>
             
-                <button type="submit" id="submitBtn">SIGN UP</button>
+                <button type="submit" id="submitBtn">Sign Up</button>
             </form>
             </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <div class="footer-content">
+            <div class="footer-text">
+                © SCC. 2025 <a href="#">terms of service</a> | <a href="#">privacy policy</a>
+            </div>
+        </div>
     </div>
 
     <script>
