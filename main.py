@@ -3,6 +3,8 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi import Request
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
+import secrets
 import uvicorn
 from twilio.rest import Client
 import os
@@ -48,6 +50,12 @@ if not GEMINI_API_KEY:
 
 # FastAPI 앱 인스턴스 생성
 app = FastAPI(title="Community Control AI", version="1.0.0")
+
+# Basic Auth 설정 (운영자 페이지 보호용)
+security_basic = HTTPBasic()
+ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
+ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
 
 # 요청 로깅 미들웨어
 @app.middleware("http")
@@ -142,8 +150,18 @@ async def root(request: Request):
         )
 
 @app.get("/dashboard", response_class=HTMLResponse)
-async def dashboard(request: Request, db: Session = Depends(get_db)):
-    """운영자 대시보드 페이지"""
+async def dashboard(
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """운영자 대시보드 페이지 (JWT 기반 관리자 제한)"""
+    # 관리자 이메일 체크
+    if not ADMIN_EMAIL or current_user.email != ADMIN_EMAIL:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access restricted to admin"
+        )
     # 모든 사용자 조회
     users = db.query(User).all()
     return templates.TemplateResponse("dashboard.html", {"request": request, "users": users})
