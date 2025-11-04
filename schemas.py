@@ -172,6 +172,10 @@ class TokenData(BaseModel):
 # --------------------
 # 소셜 로그인 관련 스키마
 # --------------------
+class AdminLoginRequest(BaseModel):
+    """관리자 코드 기반 로그인 요청 스키마"""
+    code: str
+
 class AppleLoginRequest(BaseModel):
     """Apple 로그인 요청 스키마"""
     identity_token: str  # Apple에서 받은 ID 토큰

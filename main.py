@@ -13,7 +13,7 @@ import random
 from dotenv import load_dotenv
 from sqlalchemy.orm import Session, joinedload
 from database import VerificationCode, SessionLocal, User, Meeting, UserMeeting, get_db, init_db
-from schemas import SMSRequest, SMSVerify, UserCreate, UserOut, CSParseRequest, CSParseResponse, MeetingCreate, MeetingOut, UserMeetingInterest, LoginRequest, LoginResponse, AppleLoginRequest, KakaoLoginRequest, SocialLoginResponse, ChatRequest, ChatResponse
+from schemas import SMSRequest, SMSVerify, UserCreate, UserOut, CSParseRequest, CSParseResponse, MeetingCreate, MeetingOut, UserMeetingInterest, LoginRequest, LoginResponse, AppleLoginRequest, KakaoLoginRequest, SocialLoginResponse, ChatRequest, ChatResponse, AdminLoginRequest
 from sqlalchemy.exc import IntegrityError # 데이터베이스 무결성 오류 처리용
 import json
 import requests
@@ -56,6 +56,8 @@ security_basic = HTTPBasic()
 ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
+ADMIN_PHONE_NUMBER = os.getenv("ADMIN_PHONE_NUMBER")
+ADMIN_ACCESS_CODE = os.getenv("ADMIN_ACCESS_CODE")
 
 # 요청 로깅 미들웨어
 @app.middleware("http")
@@ -152,16 +154,28 @@ async def root(request: Request):
 @app.get("/dashboard", response_class=HTMLResponse)
 async def dashboard(
     request: Request,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user_optional),
     db: Session = Depends(get_db)
 ):
     """운영자 대시보드 페이지 (JWT 기반 관리자 제한)"""
-    # 관리자 이메일 체크
-    if not ADMIN_EMAIL or current_user.email != ADMIN_EMAIL:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access restricted to admin"
-        )
+    # 1) 관리자 코드 우선 체크 (헤더): X-Admin-Code
+    admin_code_header = request.headers.get("X-Admin-Code")
+    if ADMIN_ACCESS_CODE and admin_code_header and secrets.compare_digest(admin_code_header, ADMIN_ACCESS_CODE):
+        pass
+    else:
+        # 2) JWT 기반 관리자 체크 (email 또는 phone)
+        if current_user is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Missing or invalid token"
+            )
+        is_admin_email = ADMIN_EMAIL and current_user.email == ADMIN_EMAIL
+        is_admin_phone = ADMIN_PHONE_NUMBER and current_user.phone_number == ADMIN_PHONE_NUMBER
+        if not (is_admin_email or is_admin_phone):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access restricted to admin"
+            )
     # 모든 사용자 조회
     users = db.query(User).all()
     return templates.TemplateResponse("dashboard.html", {"request": request, "users": users})
@@ -1006,3 +1020,51 @@ async def chat_with_bot(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Chatbot error: {str(e)}"
         )
+
+
+# =========================================================================
+# 💡 관리자 코드 로그인 엔드포인트 (/auth/admin_login)
+# =========================================================================
+@app.post("/auth/admin_login", response_model=LoginResponse)
+async def admin_login(request: AdminLoginRequest, db: Session = Depends(get_db)):
+    """
+    관리자 코드로 로그인하여 JWT 발급.
+    - 환경변수 ADMIN_ACCESS_CODE 와 요청의 code 일치 시 성공
+    - 토큰은 관리자 사용자(ADMIN_EMAIL 또는 ADMIN_PHONE_NUMBER에 해당)를 기준으로 발급
+    """
+    if not ADMIN_ACCESS_CODE:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="ADMIN_ACCESS_CODE is not configured"
+        )
+    if not secrets.compare_digest(request.code, ADMIN_ACCESS_CODE):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid admin code"
+        )
+
+    # 관리자 사용자 조회 (이메일 우선, 없으면 전화번호)
+    admin_user = None
+    if ADMIN_EMAIL:
+        admin_user = db.query(User).filter(User.email == ADMIN_EMAIL).first()
+    if admin_user is None and ADMIN_PHONE_NUMBER:
+        admin_user = db.query(User).filter(User.phone_number == ADMIN_PHONE_NUMBER).first()
+
+    if admin_user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Admin user not found. Set ADMIN_EMAIL or ADMIN_PHONE_NUMBER to an existing user."
+        )
+
+    access_token = create_access_token(
+        data={
+            "user_id": admin_user.id,
+            "phone_number": admin_user.phone_number,
+        }
+    )
+
+    return LoginResponse(
+        access_token=access_token,
+        token_type="bearer",
+        user=admin_user
+    )
