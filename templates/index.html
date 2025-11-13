@@ -893,15 +893,8 @@
 
         // SIGN UP 버튼 클릭 시 register_form으로 이동
         document.getElementById('signupBtn').addEventListener('click', function(e) {
-            e.preventDefault();
-            
-            // 부드러운 페이드아웃 효과
-            document.body.style.transition = 'opacity 0.3s ease';
-            document.body.style.opacity = '0';
-            
-            setTimeout(() => {
-                window.location.href = '/register_form';
-            }, 300);
+            // 직접 이동 (Safari 호환성 개선)
+            window.location.href = '/register_form';
         });
 
         // 이미지 로드 에러 처리

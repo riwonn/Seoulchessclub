@@ -723,9 +723,18 @@
 
         // 화면 전환 함수 (히스토리 지원)
         function switchScreen(fromScreen, toScreen, state) {
-            document.getElementById(fromScreen)?.classList.remove('active');
-            document.getElementById(toScreen)?.classList.add('active');
-            history.pushState({ screen: toScreen }, '', '');
+            const fromEl = document.getElementById(fromScreen);
+            const toEl = document.getElementById(toScreen);
+
+            if (fromEl) fromEl.classList.remove('active');
+            if (toEl) toEl.classList.add('active');
+
+            // Safari 호환성: replaceState 대신 pushState 사용
+            try {
+                history.pushState({ screen: toScreen }, '', window.location.pathname + '#' + toScreen);
+            } catch (e) {
+                console.log('History API not supported');
+            }
         }
 
         // 2단계 A: 환영 화면 표시 (재방문 고객)
@@ -883,28 +892,67 @@
             }
         });
 
-        // 뒤로가기 버튼 핸들러
+        // 뒤로가기 버튼 핸들러 (Safari 호환성 개선)
         window.addEventListener('popstate', function(event) {
+            // Safari에서는 event.state가 null일 수 있음
+            let targetScreen = 'phoneScreen';
+
             if (event.state && event.state.screen) {
-                // 모든 화면 숨기기
-                document.querySelectorAll('.screen').forEach(screen => {
-                    screen.classList.remove('active');
-                });
-                
-                // 해당 화면 표시
-                document.getElementById(event.state.screen)?.classList.add('active');
+                targetScreen = event.state.screen;
             } else {
-                // state가 없으면 첫 화면으로
-                document.querySelectorAll('.screen').forEach(screen => {
-                    screen.classList.remove('active');
-                });
-                document.getElementById('phoneScreen')?.classList.add('active');
+                // URL 해시에서 화면 정보 가져오기
+                const hash = window.location.hash.replace('#', '');
+                if (hash && document.getElementById(hash)) {
+                    targetScreen = hash;
+                }
+            }
+
+            // 모든 화면 숨기기
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+
+            // 해당 화면 표시
+            const targetEl = document.getElementById(targetScreen);
+            if (targetEl) {
+                targetEl.classList.add('active');
+            } else {
+                // 기본 화면으로 폴백
+                const phoneScreen = document.getElementById('phoneScreen');
+                if (phoneScreen) phoneScreen.classList.add('active');
             }
         });
 
         // 페이지 로드 시 초기 state 설정
-        window.addEventListener('load', function() {
-            history.replaceState({ screen: 'phoneScreen' }, '', '');
+        window.addEventListener('DOMContentLoaded', function() {
+            // Safari 호환성: setTimeout으로 지연 실행
+            setTimeout(function() {
+                try {
+                    const currentHash = window.location.hash.replace('#', '');
+                    const initialScreen = currentHash || 'phoneScreen';
+                    history.replaceState({ screen: initialScreen }, '', window.location.pathname + '#' + initialScreen);
+                } catch (e) {
+                    console.log('History API initialization failed:', e);
+                }
+            }, 0);
+        });
+
+        // Safari에서 페이지 캐시 처리
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                // 페이지가 bfcache에서 복원된 경우
+                const hash = window.location.hash.replace('#', '');
+                const targetScreen = hash || 'phoneScreen';
+
+                document.querySelectorAll('.screen').forEach(screen => {
+                    screen.classList.remove('active');
+                });
+
+                const targetEl = document.getElementById(targetScreen);
+                if (targetEl) {
+                    targetEl.classList.add('active');
+                }
+            }
         });
     </script>
 </body>
