@@ -8,20 +8,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Fustat:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/design-system.css">
     <script src="/static/js/i18n.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: 'Fustat', sans-serif;
-            background: #0d0d0d;
-            color: #ffb3fd;
-            min-height: 100vh;
-            padding: 20px;
+            padding: var(--space-5);
         }
 
         .container {
@@ -32,12 +23,12 @@
         }
 
         h1 {
-            font-family: 'Instrument Serif', serif;
-            font-size: 32px;
-            font-weight: 400;
-            margin-bottom: 15px;
+            font-family: var(--font-display);
+            font-size: var(--text-4xl);
+            font-weight: var(--font-normal);
+            margin-bottom: var(--space-4);
             letter-spacing: 0;
-            color: #ffb3fd;
+            color: var(--color-text-primary);
             text-align: center;
         }
 
@@ -120,18 +111,18 @@
         }
 
         .meeting-card {
-            background: rgba(61, 35, 82, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 16px;
-            padding: 25px;
-            transition: all 0.3s ease;
+            background: var(--color-overlay-dark);
+            border: 1px solid var(--color-border-light);
+            border-radius: var(--radius-xl);
+            padding: var(--space-6);
+            transition: all var(--transition-base);
             animation: fadeIn 0.5s ease-in;
         }
 
         .meeting-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(232, 164, 216, 0.2);
-            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: var(--shadow-glow-strong);
+            border-color: var(--color-border-primary);
         }
 
         @keyframes fadeIn {
@@ -180,26 +171,26 @@
 
         .register-btn {
             width: 100%;
-            padding: 14px;
-            margin-top: 20px;
-            font-family: 'Instrument Serif', serif;
-            font-size: 15px;
-            font-weight: 500;
-            border: 0.75px solid rgba(255, 179, 253, 0.3);
-            border-radius: 12px;
-            background: #4d1849;
-            color: #ffb3fd;
+            padding: var(--space-3);
+            margin-top: var(--space-5);
+            font-family: var(--font-display);
+            font-size: var(--text-base);
+            font-weight: var(--font-medium);
+            border: 0.75px solid var(--color-border-primary);
+            border-radius: var(--radius-md);
+            background: var(--color-accent-primary);
+            color: var(--color-text-primary);
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all var(--transition-base);
             text-transform: uppercase;
             letter-spacing: 1px;
         }
 
         .register-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(255, 179, 253, 0.3);
-            background: #5d1e59;
-            border-color: rgba(255, 179, 253, 0.5);
+            box-shadow: var(--shadow-glow-strong);
+            background: var(--color-accent-hover);
+            border-color: var(--color-border-hover);
         }
 
         .register-btn:active {
@@ -356,6 +347,7 @@
         @media (max-width: 768px) {
             body {
                 padding: 15px;
+                overflow-x: hidden;
             }
 
             .meetings-grid {
@@ -408,12 +400,14 @@
 
             .modal-btn {
                 width: 100%;
+                min-height: 44px;
             }
         }
 
         @media (max-width: 480px) {
             body {
                 padding: 10px;
+                overflow-x: hidden;
             }
 
             .container {
@@ -428,6 +422,7 @@
             .subtitle {
                 font-size: 15px;
                 margin-bottom: 15px;
+                line-height: 1.5;
             }
 
             .user-info {
@@ -440,8 +435,12 @@
             }
 
             .register-link {
-                padding: 6px 16px;
+                padding: 8px 18px;
                 font-size: 13px;
+                min-height: 40px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
             }
 
             .icons-row {
@@ -479,20 +478,23 @@
             }
 
             .meeting-capacity {
-                padding: 5px 12px;
+                padding: 6px 12px;
                 font-size: 12px;
                 margin-top: 8px;
             }
 
             .register-btn {
-                padding: 12px;
+                padding: 13px;
                 font-size: 14px;
                 margin-top: 15px;
+                min-height: 44px;
+                touch-action: manipulation;
             }
 
             .modal-content {
                 padding: 20px;
                 width: 95%;
+                max-width: calc(100vw - 20px);
                 border-radius: 16px;
             }
 
@@ -517,8 +519,10 @@
             }
 
             .modal-btn {
-                padding: 10px 20px;
+                padding: 12px 20px;
                 font-size: 14px;
+                min-height: 44px;
+                touch-action: manipulation;
             }
 
             .empty-state {
@@ -527,6 +531,46 @@
 
             .empty-state-icon {
                 font-size: 48px;
+            }
+
+            #paidCheckbox {
+                width: 22px !important;
+                height: 22px !important;
+                margin-right: 12px !important;
+            }
+        }
+
+        @media (max-width: 375px) {
+            h1 {
+                font-size: 20px;
+            }
+
+            .subtitle {
+                font-size: 14px;
+            }
+
+            .meeting-title {
+                font-size: 17px;
+            }
+
+            .meeting-info {
+                font-size: 13px;
+            }
+
+            .register-btn {
+                font-size: 13px;
+            }
+
+            .modal-content {
+                padding: 18px;
+            }
+
+            .modal-title {
+                font-size: 16px;
+            }
+
+            .modal-message {
+                font-size: 13px;
             }
         }
 

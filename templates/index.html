@@ -9,19 +9,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Fustat:wght@400;500;600&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/design-system.css">
     <script src="/static/js/i18n.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: 'Fustat', sans-serif;
-            background: #0d0d0d;
-            color: #ffb3fd;
-            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -135,28 +126,27 @@
         }
 
         .nav-btn {
-            font-family: 'Instrument Serif', serif;
-            background: rgba(42, 13, 41, 0.5);
+            font-family: var(--font-display);
+            background: var(--color-overlay-darker);
             backdrop-filter: blur(6px);
-            border: 0.75px solid rgba(255, 179, 253, 0.3);
-            color: #ffbffd;
-            padding: 8px 14px;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 400;
+            border: 0.75px solid var(--color-border-primary);
+            color: var(--color-text-secondary);
+            padding: var(--space-2) var(--space-3);
+            border-radius: var(--radius-md);
+            font-size: var(--text-md);
+            font-weight: var(--font-normal);
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all var(--transition-base);
             text-decoration: none;
-            display: inline-block;
-            height: 40px;
-            display: flex;
+            display: inline-flex;
             align-items: center;
+            height: 40px;
         }
 
         .nav-btn:hover {
-            background: rgba(42, 13, 41, 0.7);
+            background: var(--color-overlay-dark);
             transform: translateY(-2px);
-            border-color: rgba(255, 179, 253, 0.5);
+            border-color: var(--color-border-hover);
         }
 
         .instagram-btn {
@@ -240,28 +230,28 @@
         }
 
         .signup-btn {
-            font-family: 'Fustat', sans-serif;
-            background: #4d1849;
+            font-family: var(--font-primary);
+            background: var(--color-accent-primary);
             backdrop-filter: blur(10px);
-            border: 0.75px solid rgba(255, 179, 253, 0.3);
-            color: #ffb3fd;
-            padding: 12px 28px 12px 24px;
-            border-radius: 14px;
-            font-size: 16px;
-            font-weight: 500;
+            border: 0.75px solid var(--color-border-primary);
+            color: var(--color-text-primary);
+            padding: var(--space-3) var(--space-6) var(--space-3) var(--space-6);
+            border-radius: var(--radius-lg);
+            font-size: var(--text-md);
+            font-weight: var(--font-medium);
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all var(--transition-base);
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: var(--space-2);
         }
 
         .signup-btn:hover {
-            background: #5d1e59;
+            background: var(--color-accent-hover);
             transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(255, 179, 253, 0.3);
-            border-color: rgba(255, 179, 253, 0.5);
+            box-shadow: var(--shadow-glow-strong);
+            border-color: var(--color-border-hover);
         }
 
         .arrow-icon {
@@ -428,6 +418,15 @@
         }
 
         @media (max-width: 480px) {
+            body {
+                overflow-x: hidden;
+            }
+
+            .main-wrapper {
+                padding: 0;
+                gap: 0;
+            }
+
             .container {
                 max-width: 100%;
                 height: 100vh;
@@ -438,45 +437,130 @@
                 border-radius: 0;
             }
 
+            .top-nav {
+                padding: 0 16px;
+                top: 12px;
+            }
+
+            .logo-icon {
+                height: 32px;
+            }
+
+            .nav-btn {
+                padding: 6px 12px;
+                font-size: 14px;
+                height: 36px;
+            }
+
+            .instagram-btn {
+                width: 36px;
+                height: 36px;
+            }
+
+            .instagram-icon {
+                width: 20px;
+                height: 20px;
+            }
+
             .title-regular {
-                font-size: 28px;
-                letter-spacing: -1.12px;
+                font-size: 24px;
+                letter-spacing: -0.96px;
             }
 
             .title-italic {
-                font-size: 30.6px;
-                letter-spacing: -1.224px;
+                font-size: 26px;
+                letter-spacing: -1.04px;
             }
 
             .center-content {
-                width: 280px;
+                width: 90%;
+                max-width: 300px;
+            }
+
+            .title-line {
+                gap: 8px;
             }
 
             .signup-section {
-                bottom: 70px;
+                bottom: 80px;
+            }
+
+            .signup-btn {
+                padding: 10px 24px 10px 20px;
+                font-size: 15px;
+            }
+
+            .arrow-icon {
+                width: 18px;
+                height: 18px;
             }
 
             .footer-links {
                 bottom: 30px;
+                font-size: 11px;
+                flex-wrap: wrap;
+                gap: 6px;
+                padding: 0 16px;
+                text-align: center;
+            }
+
+            .footer-separator {
+                display: none;
+            }
+
+            .footer-link {
+                display: block;
+                width: 100%;
+                margin: 4px 0;
             }
 
             .modal-box {
                 width: 95%;
                 max-width: 100%;
+                padding: 16px 16px 24px 16px;
             }
 
             .modal-title .title-regular {
+                font-size: 22px;
+                letter-spacing: -0.88px;
+            }
+
+            .modal-title .title-italic {
                 font-size: 24px;
                 letter-spacing: -0.96px;
             }
 
-            .modal-title .title-italic {
-                font-size: 26.4px;
-                letter-spacing: -1.056px;
-            }
-
             .modal-content {
                 font-size: 14px;
+                line-height: 1.5;
+            }
+
+            .modal-close {
+                width: 20px;
+                height: 20px;
+            }
+        }
+
+        @media (max-width: 375px) {
+            .title-regular {
+                font-size: 22px;
+            }
+
+            .title-italic {
+                font-size: 24px;
+            }
+
+            .center-content {
+                width: 85%;
+            }
+
+            .signup-btn {
+                font-size: 14px;
+                padding: 9px 20px 9px 18px;
+            }
+
+            .footer-links {
+                font-size: 10px;
             }
         }
 

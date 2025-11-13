@@ -185,6 +185,21 @@ async def register_form(request: Request):
     """사용자 등록 폼 페이지"""
     return templates.TemplateResponse("register.html", {"request": request})
 
+@app.get("/terms-of-service", response_class=HTMLResponse)
+async def terms_of_service(request: Request):
+    """약관 페이지"""
+    return templates.TemplateResponse("terms-of-service.html", {"request": request})
+
+@app.get("/privacy-policy", response_class=HTMLResponse)
+async def privacy_policy(request: Request):
+    """개인정보 보호정책 페이지"""
+    return templates.TemplateResponse("privacy-policy.html", {"request": request})
+
+@app.get("/design-system", response_class=HTMLResponse)
+async def design_system_demo(request: Request):
+    """디자인 시스템 데모 페이지"""
+    return templates.TemplateResponse("design-system-demo.html", {"request": request})
+
 @app.get("/meetings_list", response_class=HTMLResponse)
 async def meetings_list(request: Request, db: Session = Depends(get_db)):
     """모임 목록 페이지 - 모든 활성화된 모임을 표시"""

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Design System Demo - Community Control AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fustat:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/design-system.css">
+    <style>
+        .demo-section {
+            margin-bottom: var(--space-12);
+            padding: var(--space-8);
+            background: var(--color-overlay-dark);
+            border: 1px solid var(--color-border-light);
+            border-radius: var(--radius-xl);
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-6);
+            margin-top: var(--space-6);
+        }
+
+        .color-swatch {
+            padding: var(--space-6);
+            border-radius: var(--radius-md);
+            text-align: center;
+            font-size: var(--text-sm);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--space-8);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="heading-display text-center mb-6">Design System Showcase</h1>
+        <p class="text-center text-tertiary mb-12">Community Control AI Design System Components</p>
+
+        <!-- Colors -->
+        <section class="demo-section">
+            <h2 class="heading-2 mb-6">Colors</h2>
+            <div class="demo-grid">
+                <div class="color-swatch" style="background: var(--color-accent-primary);">
+                    Primary Accent<br>#4d1849
+                </div>
+                <div class="color-swatch" style="background: var(--color-accent-hover);">
+                    Accent Hover<br>#5d1e59
+                </div>
+                <div class="color-swatch" style="background: var(--color-accent-light); color: #000;">
+                    Accent Light<br>#e8a4d8
+                </div>
+                <div class="color-swatch" style="background: var(--color-bg-tertiary);">
+                    BG Tertiary<br>#2a0d29
+                </div>
+            </div>
+        </section>
+
+        <!-- Typography -->
+        <section class="demo-section">
+            <h2 class="heading-2 mb-6">Typography</h2>
+            <div class="flex flex-col gap-4">
+                <h1 class="heading-display">Display Heading (36px)</h1>
+                <h1 class="heading-1">Heading 1 (32px)</h1>
+                <h2 class="heading-2">Heading 2 (24px)</h2>
+                <h3 class="heading-3">Heading 3 (18px)</h3>
+                <p class="text-xl">Extra Large Text (18px)</p>
+                <p class="text-lg">Large Text (17px)</p>
+                <p class="text-base">Base Text (15px)</p>
+                <p class="text-sm">Small Text (14px)</p>
+                <p class="text-xs">Extra Small Text (12px)</p>
+            </div>
+        </section>
+
+        <!-- Buttons -->
+        <section class="demo-section">
+            <h2 class="heading-2 mb-6">Buttons</h2>
+            <div class="flex flex-col gap-6">
+                <div class="flex gap-4 items-center" style="flex-wrap: wrap;">
+                    <button class="btn btn-primary">Primary Button</button>
+                    <button class="btn btn-secondary">Secondary Button</button>
+                    <button class="btn btn-accent">Accent Button</button>
+                    <button class="btn btn-primary" disabled>Disabled</button>
+                </div>
+
+                <div class="flex gap-4 items-center" style="flex-wrap: wrap;">
+                    <button class="btn btn-primary btn-sm">Small</button>
+                    <button class="btn btn-primary btn-md">Medium</button>
+                    <button class="btn btn-primary btn-lg">Large</button>
+                </div>
+
+                <div class="flex gap-4 items-center">
+                    <button class="btn btn-primary btn-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                    </button>
+                    <button class="btn btn-secondary btn-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cards -->
+        <section class="demo-section">
+            <h2 class="heading-2 mb-6">Cards</h2>
+            <div class="demo-grid">
+                <div class="card">
+                    <h3 class="heading-3 mb-3">Basic Card</h3>
+                    <p class="text-tertiary text-sm">This is a standard card component with default styling.</p>
+                </div>
+
+                <div class="card card-hover">
+                    <h3 class="heading-3 mb-3">Hoverable Card</h3>
+                    <p class="text-tertiary text-sm">Hover over this card to see the interactive effect.</p>
+                </div>
+
+                <div class="card card-compact">
+                    <h3 class="heading-3 mb-2">Compact Card</h3>
+                    <p class="text-tertiary text-sm">This card has reduced padding.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Forms -->
+        <section class="demo-section">
+            <h2 class="heading-2 mb-6">Forms</h2>
+            <div style="max-width: 500px;">
+                <div class="form-group">
+                    <label class="form-label">Text Input</label>
+                    <input type="text" class="form-input" placeholder="Enter text here">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Select Dropdown</label>
+                    <select class="form-select">
+                        <option>Option 1</option>
+                        <option>Option 2</option>
+                        <option>Option 3</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Textarea</label>
+                    <textarea class="form-textarea" rows="4" placeholder="Enter your message"></textarea>
+                </div>
+
+                <button class="btn btn-primary">Submit Form</button>
+            </div>
+        </section>
+
+        <!-- Alerts -->
+        <section class="demo-section">
+            <h2 class="heading-2 mb-6">Status Messages</h2>
+            <div class="flex flex-col gap-4">
+                <div class="alert alert-success show">
+                    ✓ Operation completed successfully!
+                </div>
+
+                <div class="alert alert-error show">
+                    ✗ An error occurred. Please try again.
+                </div>
+            </div>
+        </section>
+
+        <!-- Utilities -->
+        <section class="demo-section">
+            <h2 class="heading-2 mb-6">Utility Classes</h2>
+            <div class="flex flex-col gap-6">
+                <div>
+                    <h3 class="heading-3 mb-3">Spacing</h3>
+                    <div class="flex gap-2" style="flex-wrap: wrap;">
+                        <div class="p-2" style="background: var(--color-accent-light); color: #000;">p-2</div>
+                        <div class="p-4" style="background: var(--color-accent-light); color: #000;">p-4</div>
+                        <div class="p-6" style="background: var(--color-accent-light); color: #000;">p-6</div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="heading-3 mb-3">Shadows</h3>
+                    <div class="flex gap-4" style="flex-wrap: wrap;">
+                        <div class="card shadow-sm">shadow-sm</div>
+                        <div class="card shadow-md">shadow-md</div>
+                        <div class="card shadow-lg">shadow-lg</div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="heading-3 mb-3">Border Radius</h3>
+                    <div class="flex gap-4" style="flex-wrap: wrap;">
+                        <div class="card rounded-sm">rounded-sm</div>
+                        <div class="card rounded-md">rounded-md</div>
+                        <div class="card rounded-lg">rounded-lg</div>
+                        <div class="card rounded-xl">rounded-xl</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Loading States -->
+        <section class="demo-section">
+            <h2 class="heading-2 mb-6">Loading States</h2>
+            <div class="flex gap-6 items-center">
+                <div class="spinner"></div>
+                <div class="spinner spinner-lg"></div>
+                <button class="btn btn-primary" disabled>
+                    <div class="spinner"></div>
+                    Loading...
+                </button>
+            </div>
+        </section>
+
+        <!-- Animations -->
+        <section class="demo-section">
+            <h2 class="heading-2 mb-6">Animations</h2>
+            <div class="flex gap-4" style="flex-wrap: wrap;">
+                <div class="card animate-fade-in">Fade In</div>
+                <div class="card animate-float">Float</div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
