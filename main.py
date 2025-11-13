@@ -200,6 +200,11 @@ async def design_system_demo(request: Request):
     """디자인 시스템 데모 페이지"""
     return templates.TemplateResponse("design-system-demo.html", {"request": request})
 
+@app.get("/admin-login", response_class=HTMLResponse)
+async def admin_login_page(request: Request):
+    """관리자 로그인 페이지"""
+    return templates.TemplateResponse("admin-login.html", {"request": request})
+
 @app.get("/meetings_list", response_class=HTMLResponse)
 async def meetings_list(request: Request, db: Session = Depends(get_db)):
     """모임 목록 페이지 - 모든 활성화된 모임을 표시"""

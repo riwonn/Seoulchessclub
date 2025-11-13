@@ -52,11 +52,35 @@
             z-index: 10;
         }
 
+        /* Image Slider Styles */
+        .hero-images {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
         .hero-image {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
             object-fit: cover;
             filter: brightness(0.95) contrast(1.1) saturate(0.9) sepia(0.15);
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+        }
+
+        .hero-image.active {
+            opacity: 1;
+            z-index: 1;
+        }
+
+        .hero-image.prev {
+            opacity: 0;
+            z-index: 0;
         }
 
         /* 필름 그레인 효과 */
@@ -841,14 +865,59 @@
     <div class="main-wrapper">
         <div class="container">
             <div class="hero-card">
-                <!-- 배경 이미지 -->
-                <img 
-                    src="/static/images/hero.jpg" 
-                    alt="Chess Community" 
-                    class="hero-image"
-                    onerror="this.src='https://images.unsplash.com/photo-1611195974492-ca9d4d6c1746?w=600&h=900&fit=crop&q=80'"
-                >
-            
+                <!-- 배경 이미지 슬라이더 -->
+                <div class="hero-images">
+                    <img
+                        src="/static/images/hero-1.webp"
+                        alt="Chess Community 1"
+                        class="hero-image active"
+                        data-slide="0"
+                        onerror="this.src='https://images.unsplash.com/photo-1611195974492-ca9d4d6c1746?w=600&h=900&fit=crop&q=80'"
+                    >
+                    <img
+                        src="/static/images/hero-2.webp"
+                        alt="Chess Community 2"
+                        class="hero-image"
+                        data-slide="1"
+                        onerror="this.style.display='none'"
+                    >
+                    <img
+                        src="/static/images/hero-3.webp"
+                        alt="Chess Community 3"
+                        class="hero-image"
+                        data-slide="2"
+                        onerror="this.style.display='none'"
+                    >
+                    <img
+                        src="/static/images/hero-4.webp"
+                        alt="Chess Community 4"
+                        class="hero-image"
+                        data-slide="3"
+                        onerror="this.style.display='none'"
+                    >
+                    <img
+                        src="/static/images/hero-5.webp"
+                        alt="Chess Community 5"
+                        class="hero-image"
+                        data-slide="4"
+                        onerror="this.style.display='none'"
+                    >
+                    <img
+                        src="/static/images/hero-6.webp"
+                        alt="Chess Community 6"
+                        class="hero-image"
+                        data-slide="5"
+                        onerror="this.style.display='none'"
+                    >
+                    <img
+                        src="/static/images/hero-7.webp"
+                        alt="Chess Community 7"
+                        class="hero-image"
+                        data-slide="6"
+                        onerror="this.style.display='none'"
+                    >
+                </div>
+
             <!-- 오버레이 -->
             <div class="overlay"></div>
 
@@ -981,10 +1050,57 @@
             window.location.href = '/register_form';
         });
 
-        // 이미지 로드 에러 처리
-        document.querySelector('.hero-image').addEventListener('error', function() {
-            this.src = 'https://placehold.co/600x900/2d1b3d/e9b8ff?text=Seoul+Chess+Club';
-        });
+        // =========================================================================
+        // 🎞️ Automatic Image Slider
+        // =========================================================================
+        (function() {
+            const heroImages = document.querySelectorAll('.hero-image');
+            let currentSlide = 0;
+            const slideInterval = 5000; // 5 seconds per image
+
+            // Only run slider if we have multiple images
+            if (heroImages.length <= 1) return;
+
+            function showSlide(index) {
+                // Remove active class from all images
+                heroImages.forEach((img, i) => {
+                    img.classList.remove('active', 'prev');
+
+                    if (i === index) {
+                        // Set new active image
+                        img.classList.add('active');
+                    } else if (i === currentSlide) {
+                        // Previous active becomes prev for smooth transition
+                        img.classList.add('prev');
+                    }
+                });
+            }
+
+            function nextSlide() {
+                currentSlide = (currentSlide + 1) % heroImages.length;
+                showSlide(currentSlide);
+            }
+
+            // Start automatic slideshow
+            let sliderTimer = setInterval(nextSlide, slideInterval);
+
+            // Pause on hover (optional - improves UX)
+            const heroCard = document.querySelector('.hero-card');
+
+            heroCard.addEventListener('mouseenter', function() {
+                clearInterval(sliderTimer);
+            });
+
+            heroCard.addEventListener('mouseleave', function() {
+                sliderTimer = setInterval(nextSlide, slideInterval);
+            });
+
+            // Preload all images for smooth transitions
+            heroImages.forEach(img => {
+                const preloadImg = new Image();
+                preloadImg.src = img.src;
+            });
+        })();
     </script>
 
     <!-- 챗봇 UI -->
