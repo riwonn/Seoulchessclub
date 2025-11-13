@@ -1,9 +1,10 @@
 from fastapi import FastAPI, HTTPException, status, Depends
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi import Request
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from fastapi.middleware.cors import CORSMiddleware
 import secrets
 import uvicorn
 from twilio.rest import Client
