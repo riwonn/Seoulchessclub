@@ -18,3 +18,7 @@ OS
 
 # Image backups
 static/images/original_backups/
+
+# Logs
+*.log
+server.log
