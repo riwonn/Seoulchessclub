@@ -9,6 +9,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Fustat:wght@400;500;600&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet">
+
+    <!-- Preload first hero image for faster initial load -->
+    <link rel="preload" as="image" href="/static/images/hero-1.webp" fetchpriority="high">
+
     <link rel="stylesheet" href="/static/css/design-system.css">
     <script src="/static/js/i18n.js"></script>
     <style>
@@ -882,6 +886,10 @@
                         alt="Chess Community 1"
                         class="hero-image active"
                         data-slide="0"
+                        loading="eager"
+                        fetchpriority="high"
+                        width="600"
+                        height="900"
                         onerror="this.src='https://images.unsplash.com/photo-1611195974492-ca9d4d6c1746?w=600&h=900&fit=crop&q=80'"
                     >
                     <img
@@ -889,6 +897,9 @@
                         alt="Chess Community 2"
                         class="hero-image"
                         data-slide="1"
+                        loading="lazy"
+                        width="600"
+                        height="900"
                         onerror="this.style.display='none'"
                     >
                     <img
@@ -896,6 +907,9 @@
                         alt="Chess Community 3"
                         class="hero-image"
                         data-slide="2"
+                        loading="lazy"
+                        width="600"
+                        height="900"
                         onerror="this.style.display='none'"
                     >
                     <img
@@ -903,6 +917,9 @@
                         alt="Chess Community 4"
                         class="hero-image"
                         data-slide="3"
+                        loading="lazy"
+                        width="600"
+                        height="900"
                         onerror="this.style.display='none'"
                     >
                     <img
@@ -910,6 +927,9 @@
                         alt="Chess Community 5"
                         class="hero-image"
                         data-slide="4"
+                        loading="lazy"
+                        width="600"
+                        height="900"
                         onerror="this.style.display='none'"
                     >
                     <img
@@ -917,6 +937,9 @@
                         alt="Chess Community 6"
                         class="hero-image"
                         data-slide="5"
+                        loading="lazy"
+                        width="600"
+                        height="900"
                         onerror="this.style.display='none'"
                     >
                     <img
@@ -924,6 +947,9 @@
                         alt="Chess Community 7"
                         class="hero-image"
                         data-slide="6"
+                        loading="lazy"
+                        width="600"
+                        height="900"
                         onerror="this.style.display='none'"
                     >
                 </div>
