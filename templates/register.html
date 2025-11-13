@@ -38,8 +38,8 @@
             bottom: 0;
             left: 0;
             right: 0;
-            padding: 40px 20px 20px 20px;
-            background: linear-gradient(to top, #1e1e1e 70%, transparent);
+            padding: var(--space-8) var(--space-5) var(--space-5) var(--space-5);
+            background: linear-gradient(to top, var(--color-bg-tertiary) 70%, transparent);
         }
 
         .footer-content {
@@ -49,19 +49,19 @@
         }
 
         .footer-text {
-            font-size: 13px;
-            color: rgba(232, 212, 240, 0.6);
-            font-weight: 400;
+            font-size: var(--text-xs);
+            color: var(--color-text-tertiary);
+            font-weight: var(--font-normal);
         }
 
         .footer-text a {
-            color: rgba(232, 212, 240, 0.6);
+            color: var(--color-text-tertiary);
             text-decoration: none;
-            transition: color 0.2s;
+            transition: color var(--transition-fast);
         }
 
         .footer-text a:hover {
-            color: rgba(232, 212, 240, 0.9);
+            color: var(--color-text-secondary);
         }
 
         .screen {
@@ -95,40 +95,40 @@
         }
 
         .description {
-            font-family: 'Fustat', sans-serif;
+            font-family: var(--font-body);
             font-style: normal;
-            font-size: 15px;
+            font-size: var(--text-base);
             line-height: 1.7;
-            margin-bottom: 40px;
-            color: rgba(255, 191, 253, 0.85);
-            font-weight: 400;
+            margin-bottom: var(--space-8);
+            color: var(--color-text-secondary);
+            font-weight: var(--font-normal);
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: var(--space-5);
         }
 
         label {
             display: block;
-            font-size: 14px;
-            margin-bottom: 8px;
-            color: #ffbffd;
-            font-weight: 400;
+            font-size: var(--text-sm);
+            margin-bottom: var(--space-2);
+            color: var(--color-text-secondary);
+            font-weight: var(--font-normal);
         }
 
         input[type="text"],
         input[type="email"],
         input[type="number"],
         select {
-            font-family: 'Fustat', sans-serif;
+            font-family: var(--font-body);
             width: 100%;
-            padding: 16px 20px;
-            font-size: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 14px;
-            background-color: rgba(61, 35, 82, 0.4);
-            color: #ffffff;
-            transition: all 0.3s ease;
+            padding: var(--space-4) var(--space-5);
+            font-size: var(--text-base);
+            border: 1px solid var(--color-border-subtle);
+            border-radius: var(--radius-lg);
+            background-color: var(--color-input-bg);
+            color: var(--color-text-primary);
+            transition: all var(--transition-base);
         }
 
         input[type="text"]:focus,
@@ -136,9 +136,9 @@
         input[type="number"]:focus,
         select:focus {
             outline: none;
-            border-color: rgba(255, 255, 255, 0.3);
-            background-color: rgba(61, 35, 82, 0.6);
-            box-shadow: 0 0 0 3px rgba(232, 164, 216, 0.15);
+            border-color: var(--color-border-focus);
+            background-color: var(--color-input-focus);
+            box-shadow: var(--shadow-focus);
         }
 
         input::placeholder {

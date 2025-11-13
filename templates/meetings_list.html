@@ -33,43 +33,43 @@
         }
 
         .subtitle {
-            font-size: 17px;
+            font-size: var(--text-lg);
             line-height: 1.6;
-            margin-bottom: 20px;
-            color: #e8d4f0;
+            margin-bottom: var(--space-5);
+            color: var(--color-text-primary);
             text-align: center;
         }
 
         .user-info {
             text-align: center;
-            margin-bottom: 30px;
-            padding: 15px;
-            background: rgba(61, 35, 82, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 12px;
+            margin-bottom: var(--space-6);
+            padding: var(--space-4);
+            background: var(--color-input-bg);
+            border: 1px solid var(--color-border-subtle);
+            border-radius: var(--radius-md);
         }
 
         .user-info-text {
-            font-size: 15px;
-            color: #ffffff;
-            margin-bottom: 10px;
+            font-size: var(--text-base);
+            color: var(--color-text-primary);
+            margin-bottom: var(--space-2);
         }
 
         .register-link {
             display: inline-block;
-            padding: 8px 20px;
-            background: #e8a4d8;
+            padding: var(--space-2) var(--space-5);
+            background: var(--color-accent-secondary);
             border: none;
-            border-radius: 8px;
-            color: #2d1a3d;
+            border-radius: var(--radius-md);
+            color: var(--color-accent-primary);
             text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.3s ease;
+            font-size: var(--text-sm);
+            font-weight: var(--font-medium);
+            transition: all var(--transition-base);
         }
 
         .register-link:hover {
-            background: #f0b4e0;
+            background: var(--color-accent-hover);
             transform: translateY(-2px);
         }
 
@@ -137,36 +137,36 @@
         }
 
         .meeting-title {
-            font-size: 22px;
-            font-weight: 600;
-            color: #ffffff;
-            margin-bottom: 15px;
+            font-size: var(--text-xl);
+            font-weight: var(--font-semibold);
+            color: var(--color-text-primary);
+            margin-bottom: var(--space-4);
         }
 
         .meeting-info {
-            margin-bottom: 12px;
-            color: #e8d4f0;
-            font-size: 15px;
+            margin-bottom: var(--space-3);
+            color: var(--color-text-primary);
+            font-size: var(--text-base);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: var(--space-2);
         }
 
         .meeting-info-icon {
-            font-size: 18px;
+            font-size: var(--text-lg);
             opacity: 0.8;
         }
 
         .meeting-capacity {
             display: inline-block;
-            padding: 6px 14px;
-            background: rgba(232, 164, 216, 0.2);
-            border: 1px solid rgba(232, 164, 216, 0.4);
-            border-radius: 20px;
-            font-size: 13px;
-            color: #e8a4d8;
-            font-weight: 500;
-            margin-top: 10px;
+            padding: var(--space-1) var(--space-3);
+            background: var(--color-overlay-dark);
+            border: 1px solid var(--color-border-primary);
+            border-radius: var(--radius-full);
+            font-size: var(--text-xs);
+            color: var(--color-accent-secondary);
+            font-weight: var(--font-medium);
+            margin-top: var(--space-2);
         }
 
         .register-btn {
