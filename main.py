@@ -30,9 +30,6 @@ TWILIO_PHONE_NUMBER = os.getenv("TWILIO_PHONE_NUMBER")
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-# FastAPI 앱 인스턴스 생성
-app = FastAPI(title="Community Control AI", version="1.0.0")
-
 # 클라이언트 초기화 시 환경 변수 누락 확인
 if not TWILIO_ACCOUNT_SID or not TWILIO_AUTH_TOKEN or not TWILIO_PHONE_NUMBER:
     print("WARNING: Twilio environment variables are not fully set.")
@@ -49,7 +46,7 @@ if not GEMINI_API_KEY:
     print("WARNING: GEMINI_API_KEY environment variable is not set.")
 
 # FastAPI 앱 인스턴스 생성
-app = FastAPI(title="Community Control AI", version="1.0.0")
+app = FastAPI(title="Seoul Chess Club", version="1.0.0")
 
 # Basic Auth 설정 (운영자 페이지 보호용)
 security_basic = HTTPBasic()
@@ -75,7 +72,7 @@ async def startup_event():
     """앱 시작 시 데이터베이스 테이블 생성"""
     try:
         print("=" * 60)
-        print("🚀 Starting Community Control AI Application...")
+        print("🚀 Starting Seoul Chess Club Application...")
         print(f"📁 Current working directory: {os.getcwd()}")
         print(f"📂 Directory contents: {os.listdir('.')}")
         print(f"🌍 Environment Variables:")
@@ -133,21 +130,21 @@ except Exception as e:
 @app.get("/health")
 async def health_check():
     """Health check endpoint for Railway"""
-    return {"status": "healthy", "service": "Community Control AI"}
+    return {"status": "healthy", "service": "Seoul Chess Club"}
 
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
     """Root endpoint - landing page"""
     try:
         if templates is None:
-            return HTMLResponse(content="<h1>Community Control AI</h1><p>Templates not configured. Check deployment logs.</p>")
+            return HTMLResponse(content="<h1>Seoul Chess Club</h1><p>Templates not configured. Check deployment logs.</p>")
         return templates.TemplateResponse("index.html", {"request": request})
     except Exception as e:
         print(f"❌ Error rendering index.html: {str(e)}")
         import traceback
         traceback.print_exc()
         return HTMLResponse(
-            content=f"<h1>Community Control AI</h1><p>Error loading page: {str(e)}</p>",
+            content=f"<h1>Seoul Chess Club</h1><p>Error loading page: {str(e)}</p>",
             status_code=500
         )
 

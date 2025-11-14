@@ -1,8 +1,8 @@
-# Community Control AI - Design System Documentation
+# Seoul Chess Club - Design System Documentation
 
 ## Overview
 
-This design system provides a comprehensive, scalable, and reusable set of CSS variables, components, and utilities based on the visual identity of the Community Control AI platform. All pages use this consistent design language for a cohesive user experience.
+This design system provides a comprehensive, scalable, and reusable set of CSS variables, components, and utilities based on the visual identity of the Seoul Chess Club platform. All pages use this consistent design language for a cohesive user experience.
 
 ## Table of Contents
 

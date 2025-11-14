@@ -78,7 +78,7 @@ const translations = {
         serverError: "서버와 통신 중 오류가 발생했습니다. 다시 시도해주세요.",
         
         // 대시보드
-        dashboardTitle: "Community Control AI",
+        dashboardTitle: "Seoul Chess Club",
         dashboardSubtitle: "운영자 대시보드",
         newMeeting: "새 모임 추가",
         meetingTitle: "모임 제목",
@@ -179,7 +179,7 @@ const translations = {
         serverError: "An error occurred while communicating with the server. Please try again.",
         
         // Dashboard
-        dashboardTitle: "Community Control AI",
+        dashboardTitle: "Seoul Chess Club",
         dashboardSubtitle: "Admin Dashboard",
         newMeeting: "Add New Meeting",
         meetingTitle: "Meeting Title",
