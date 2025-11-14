@@ -1,15 +1,15 @@
-// 다국어 지원 시스템
+// Multi-language support system
 const translations = {
     ko: {
-        // 공통
+        // Common
         back: "뒤로",
         confirm: "확인",
         cancel: "취소",
         loading: "처리 중...",
         error: "오류",
         success: "성공",
-        
-        // 모임 리스트
+
+        // Meeting List
         upcomingMeetings: "다가오는 모임",
         subtitle: "체스, 커피, 그리고 좋은 대화를 함께해요",
         welcomeUser: "님, 오늘은 어떤 모임을 신청할까요?",
@@ -20,30 +20,30 @@ const translations = {
         registerMeeting: "참가 신청",
         noMeetings: "예정된 모임이 없습니다",
         newMeetingSoon: "곧 새로운 모임이 열릴 예정입니다!",
-        
-        // 결제 모달
+
+        // Payment Modal
         paymentTitle: "결제 안내",
         paymentMessage: "결제를 하셔야 신청이 확정됩니다.",
         bankInfo: "카카오뱅크(Kakao Bank) 3333-24-5091670 김*현",
         iPaid: "결제했습니다",
         processing: "처리 중...",
-        
-        // 확인 모달
+
+        // Confirmation Modal
         confirmationTitle: "신청 접수 완료",
         confirmationMessage: "신청이 접수되었습니다.\n1~2일 내에 확인 후 확정 여부를 안내해 드리겠습니다.",
-        
-        // 에러 메시지
+
+        // Error Messages
         errorRegistering: "신청 중 문제가 발생했습니다.",
         errorServer: "서버와 통신 중 오류가 발생했습니다.",
-        
-        // 회원가입
+
+        // Registration
         welcomeTitle: "Seoul Chess Club에 오신 것을 환영합니다",
         welcomeDesc: "SCC는 새로운 사람들을 만나고,\n도시를 탐험하며,\n관계를 깊게 만들어갑니다.",
         enterPhone: "시작하려면 전화번호를 입력하세요.",
         continue: "계속하기",
         smsConsent: "계속하면 SMS 수신에 동의하게 됩니다\n(언제든지 STOP을 보내 취소 가능)",
-        
-        // 회원 정보 입력
+
+        // User Information Input
         tellAboutYourself: "자신에 대해 알려주세요",
         shareDetails: "커뮤니티에 참여하기 위해 정보를 공유해주세요",
         name: "이름",
@@ -70,14 +70,14 @@ const translations = {
         over2000: "2000 이상",
         signUp: "가입하기",
         registeringText: "등록 중...",
-        
-        // 성공/오류 메시지
+
+        // Success/Error Messages
         registrationSuccess: "회원가입이 완료되었습니다! 모임 목록으로 이동합니다... 🎉",
         registrationError: "회원가입 중 오류가 발생했습니다.",
         phoneError: "올바른 전화번호를 입력해주세요.",
         serverError: "서버와 통신 중 오류가 발생했습니다. 다시 시도해주세요.",
-        
-        // 대시보드
+
+        // Dashboard
         dashboardTitle: "Seoul Chess Club",
         dashboardSubtitle: "운영자 대시보드",
         newMeeting: "새 모임 추가",
@@ -204,48 +204,42 @@ const translations = {
     }
 };
 
-// 현재 언어 감지
+// Detect current language
 function detectLanguage() {
-    // localStorage에 저장된 언어 설정 확인
+    // Check language setting saved in localStorage
     const savedLang = localStorage.getItem('preferred_language');
     if (savedLang) {
         return savedLang;
     }
-    
-    // 브라우저 언어 감지
-    const browserLang = navigator.language || navigator.userLanguage;
-    
-    // 한국어면 'ko', 그 외는 'en'
-    if (browserLang.startsWith('ko')) {
-        return 'ko';
-    }
+
+    // Default to English
     return 'en';
 }
 
-// 현재 언어
+// Current language
 let currentLang = detectLanguage();
 
-// 번역 함수
+// Translation function
 function t(key) {
     return translations[currentLang][key] || translations['en'][key] || key;
 }
 
-// 언어 변경 함수
+// Change language function
 function setLanguage(lang) {
     if (translations[lang]) {
         currentLang = lang;
         localStorage.setItem('preferred_language', lang);
-        location.reload(); // 페이지 새로고침
+        location.reload(); // Reload page
     }
 }
 
-// 언어 토글 함수
+// Toggle language function
 function toggleLanguage() {
     const newLang = currentLang === 'ko' ? 'en' : 'ko';
     setLanguage(newLang);
 }
 
-// 전역으로 내보내기
+// Export to global scope
 window.t = t;
 window.currentLang = currentLang;
 window.setLanguage = setLanguage;

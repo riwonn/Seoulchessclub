@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -569,7 +569,7 @@
 <body>
     <div class="main-wrapper">
         <div class="container">
-            <!-- 화면 1: 전화번호 입력 (#phone-step) -->
+            <!-- Screen 1: Phone number input (#phone-step) -->
             <div id="phoneScreen" class="screen active">
                 <h1>Welcome to SCC</h1>
                 <p class="description">
@@ -613,7 +613,7 @@
             </p> -->
         </div>
 
-        <!-- 화면 2: 환영/재방문 화면 (#welcome-step) -->
+        <!-- Screen 2: Welcome/returning user screen (#welcome-step) -->
         <div id="welcomeScreen" class="screen">
             <h1 id="welcomeTitle">Hello!</h1>
             <p class="description" id="welcomeSubtitle">
@@ -634,7 +634,7 @@
             </div>
         </div>
 
-        <!-- 화면 3: 상세 정보 입력 (#details-step) -->
+        <!-- Screen 3: Details form (#details-step) -->
         <div id="detailsScreen" class="screen">
             <h1>Tell us about yourself</h1>
             <p class="description">
@@ -748,89 +748,86 @@
         let userPhoneNumber = '';
         let existingUser = null;
 
-        // 페이지 로드 시 이미 등록된 사용자인지 확인 및 다국어 적용
+        // Check if user is already registered on page load
         window.addEventListener('DOMContentLoaded', function() {
             const userId = localStorage.getItem('user_id');
             const userName = localStorage.getItem('user_name');
-            
-            // 이미 등록된 사용자면 모임 리스트로 리디렉션
+
+            // If user is already registered, redirect to meetings list
             if (userId && userName) {
                 window.location.href = '/meetings_list';
             }
-            
-            // 다국어 적용 (간단 버전 - 주요 메시지만)
-            // Note: register.html은 이미 영문으로 작성되어 있으므로 필요시 추가 적용
         });
 
-        // 1단계: 전화번호 입력 후 사용자 존재 여부 체크
+        // Step 1: Check if user exists after entering phone number
         async function checkUserAndProceed() {
             const phoneNumber = document.getElementById('phoneNumber').value.trim();
             const phoneError = document.getElementById('phoneError');
             const phoneButtonText = document.getElementById('phoneButtonText');
             const phoneSpinner = document.getElementById('phoneSpinner');
 
-            // 전화번호 검증
+            // Validate phone number
             if (!phoneNumber) {
-                phoneError.textContent = '전화번호를 입력해주세요.';
+                phoneError.textContent = 'Please enter your phone number.';
                 phoneError.classList.add('show');
                 return;
             }
 
-            // 숫자만 추출
+            // Extract digits only
             const digitsOnly = phoneNumber.replace(/\D/g, '');
-            
+
             if (digitsOnly.length < 10) {
-                phoneError.textContent = '올바른 전화번호를 입력해주세요.';
+                phoneError.textContent = 'Please enter a valid phone number.';
                 phoneError.classList.add('show');
                 return;
             }
 
-            // 전화번호 저장
+            // Save phone number
             userPhoneNumber = digitsOnly;
 
-            // 에러 메시지 숨기기
+            // Hide error message
             phoneError.classList.remove('show');
 
-            // 로딩 시작
+            // Start loading
             phoneButtonText.style.display = 'none';
             phoneSpinner.style.display = 'inline-block';
 
-            // 사용자 조회 시도
+            // Check if user exists
             try {
                 const response = await fetch(`/get_user_by_phone?phone_number=${userPhoneNumber}`);
-                
+
                 if (response.ok) {
-                    // 재방문 고객 (200 OK) - localStorage에 저장하고 모임 리스트로 바로 이동
+                    // Returning user (200 OK) - Save to localStorage and redirect to meetings list
                     existingUser = await response.json();
-                    
-                    // localStorage에 사용자 정보 저장
+
+                    // Save user info to localStorage
                     localStorage.setItem('user_id', existingUser.id);
                     localStorage.setItem('user_name', existingUser.name);
-                    
-                    // 모임 리스트로 바로 리디렉션
+
+                    // Redirect directly to meetings list
                     window.location.href = '/meetings_list';
                 } else if (response.status === 404) {
-                    // 신규 고객 (404 Not Found) - 상세 정보 입력 화면으로 이동
+                    // New user (404 Not Found) - Go to details form
                     existingUser = null;
                     showDetailsForm();
                 } else {
-                    // 기타 오류 - 상세 정보 입력 화면으로 이동 (안전하게)
+                    // Other errors - Go to details form (safe fallback)
                     existingUser = null;
                     showDetailsForm();
                 }
             } catch (error) {
                 console.error('Error checking user:', error);
-                // 오류 발생 시 상세 정보 입력 화면으로 이동
+                // On error, go to details form
                 existingUser = null;
                 showDetailsForm();
             } finally {
-                // 로딩 종료
+                // Stop loading
                 phoneButtonText.style.display = 'inline';
                 phoneSpinner.style.display = 'none';
             }
         }
 
-        // 화면 전환 함수 (히스토리 지원)
+        // Screen transition function (with history support)
         function switchScreen(fromScreen, toScreen, state) {
             const fromEl = document.getElementById(fromScreen);
             const toEl = document.getElementById(toScreen);
@@ -838,7 +835,7 @@
             if (fromEl) fromEl.classList.remove('active');
             if (toEl) toEl.classList.add('active');
 
-            // Safari 호환성: replaceState 대신 pushState 사용
+            // Safari compatibility: Use pushState instead of replaceState
             try {
                 history.pushState({ screen: toScreen }, '', window.location.pathname + '#' + toScreen);
             } catch (e) {
@@ -846,61 +843,61 @@
             }
         }
 
-        // 2단계 A: 환영 화면 표시 (재방문 고객)
+        // Step 2A: Show welcome screen (returning user)
         function showWelcomeScreen() {
-            // 환영 메시지 업데이트
+            // Update welcome message
             document.getElementById('welcomeTitle').textContent = `${existingUser.name}, Hello!`;
             document.getElementById('totalVisits').textContent = existingUser.total_visits || 0;
 
-            // 화면 전환
+            // Switch screen
             switchScreen('phoneScreen', 'welcomeScreen', { type: 'welcome' });
         }
 
-        // 2단계 B: 상세 정보 입력 화면 표시 (신규 고객)
+        // Step 2B: Show details form (new user)
         function showDetailsForm() {
-            // 숨겨진 필드에 전화번호 설정
+            // Set phone number in hidden field
             document.getElementById('finalPhoneNumber').value = userPhoneNumber;
-            
-            // 화면 전환
+
+            // Switch screen
             switchScreen('phoneScreen', 'detailsScreen', { type: 'details' });
         }
 
-        // 3단계: 환영 화면에서 상세 정보 입력 화면으로 이동 (재방문 고객)
+        // Step 3: Go to details form from welcome screen (returning user)
         function goToDetailsForm() {
             switchScreen('welcomeScreen', 'detailsScreen', { type: 'details' });
 
-            // 기존 사용자 정보로 폼 미리 채우기
+            // Pre-fill form with existing user information
             if (existingUser) {
                 document.getElementById('name').value = existingUser.name || '';
                 document.getElementById('email').value = existingUser.email || '';
-                
-                // 성별 설정
+
+                // Set gender
                 if (existingUser.gender) {
                     const genderInput = document.querySelector(`input[name="gender"][value="${existingUser.gender}"]`);
                     if (genderInput) genderInput.checked = true;
                 }
-                
-                // 출생년도 설정
+
+                // Set birth year
                 if (existingUser.birth_year) {
                     document.getElementById('birthYear').value = existingUser.birth_year;
                 }
-                
-                // 체스 경험 설정
+
+                // Set chess experience
                 if (existingUser.chess_experience) {
                     document.getElementById('chessExperience').value = existingUser.chess_experience;
                 }
-                
-                // 체스 레이팅 설정
+
+                // Set chess rating
                 if (existingUser.chess_rating) {
                     document.getElementById('chessRating').value = existingUser.chess_rating;
                 }
             }
 
-            // 전화번호 설정
+            // Set phone number
             document.getElementById('finalPhoneNumber').value = userPhoneNumber;
         }
 
-        // Enter 키로 전화번호 입력 완료
+        // Submit phone number with Enter key
         document.getElementById('phoneNumber').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
@@ -908,7 +905,7 @@
             }
         });
 
-        // 전화번호 입력 자동 포맷팅
+        // Auto-format phone number input
         document.getElementById('phoneNumber').addEventListener('input', function(e) {
             let value = e.target.value.replace(/\D/g, '');
             if (value.startsWith('010') && value.length <= 11) {
@@ -921,7 +918,7 @@
             e.target.value = value;
         });
 
-        // 최종 등록 폼 제출
+        // Submit final registration form
         document.getElementById('registerForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -930,15 +927,15 @@
             const registerError = document.getElementById('registerError');
             const successMessage = document.getElementById('successMessage');
 
-            // 에러/성공 메시지 숨기기
+            // Hide error/success messages
             registerError.classList.remove('show');
             successMessage.classList.remove('show');
 
-            // 로딩 시작
+            // Start loading
             submitBtn.disabled = true;
             loading.classList.add('show');
 
-            // 폼 데이터 수집
+            // Collect form data
             const formData = {
                 name: document.getElementById('name').value.trim(),
                 email: document.getElementById('email').value.trim(),
@@ -947,7 +944,7 @@
                 chess_experience: document.getElementById('chessExperience').value
             };
 
-            // 선택 필드 추가
+            // Add optional fields
             const birthYear = document.getElementById('birthYear').value;
             if (birthYear) {
                 formData.birth_year = parseInt(birthYear);
@@ -968,25 +965,25 @@
                 });
 
                 const data = await response.json();
-                
+
                 if (response.ok) {
-                    // 성공
+                    // Success
                     successMessage.textContent = 'Signed up successfully!🎉';
                     successMessage.classList.add('show');
-                    
-                    // 폼 초기화
+
+                    // Reset form
                     document.getElementById('registerForm').reset();
-                    
-                    // 사용자 ID 저장 (모임 신청에 사용)
+
+                    // Save user ID (used for meeting registration)
                     localStorage.setItem('user_id', data.id);
                     localStorage.setItem('user_name', data.name);
-                    
-                    // 2초 후 모임 목록으로 이동
+
+                    // Redirect to meetings list after 2 seconds
                     setTimeout(() => {
                         window.location.href = '/meetings_list';
                     }, 2000);
                 } else {
-                    // 오류
+                    // Error
                     registerError.textContent = data.detail || 'Registration failed. Please try again.';
                     registerError.classList.add('show');
                 }
@@ -995,46 +992,46 @@
                 registerError.textContent = 'Communication error. Please try again.';
                 registerError.classList.add('show');
             } finally {
-                // 로딩 종료
+                // Stop loading
                 submitBtn.disabled = false;
                 loading.classList.remove('show');
             }
         });
 
-        // 뒤로가기 버튼 핸들러 (Safari 호환성 개선)
+        // Back button handler (Safari compatibility improved)
         window.addEventListener('popstate', function(event) {
-            // Safari에서는 event.state가 null일 수 있음
+            // In Safari, event.state may be null
             let targetScreen = 'phoneScreen';
 
             if (event.state && event.state.screen) {
                 targetScreen = event.state.screen;
             } else {
-                // URL 해시에서 화면 정보 가져오기
+                // Get screen info from URL hash
                 const hash = window.location.hash.replace('#', '');
                 if (hash && document.getElementById(hash)) {
                     targetScreen = hash;
                 }
             }
 
-            // 모든 화면 숨기기
+            // Hide all screens
             document.querySelectorAll('.screen').forEach(screen => {
                 screen.classList.remove('active');
             });
 
-            // 해당 화면 표시
+            // Show target screen
             const targetEl = document.getElementById(targetScreen);
             if (targetEl) {
                 targetEl.classList.add('active');
             } else {
-                // 기본 화면으로 폴백
+                // Fallback to default screen
                 const phoneScreen = document.getElementById('phoneScreen');
                 if (phoneScreen) phoneScreen.classList.add('active');
             }
         });
 
-        // 페이지 로드 시 초기 state 설정
+        // Set initial state on page load
         window.addEventListener('DOMContentLoaded', function() {
-            // Safari 호환성: setTimeout으로 지연 실행
+            // Safari compatibility: Delayed execution with setTimeout
             setTimeout(function() {
                 try {
                     const currentHash = window.location.hash.replace('#', '');
@@ -1046,10 +1043,10 @@
             }, 0);
         });
 
-        // Safari에서 페이지 캐시 처리
+        // Handle page cache in Safari
         window.addEventListener('pageshow', function(event) {
             if (event.persisted) {
-                // 페이지가 bfcache에서 복원된 경우
+                // Page restored from bfcache
                 const hash = window.location.hash.replace('#', '');
                 const targetScreen = hash || 'phoneScreen';
 

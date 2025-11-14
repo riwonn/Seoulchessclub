@@ -44,7 +44,7 @@
             justify-content: center;
         }
 
-        /* 배경 이미지 카드 */
+        /* Hero image card */
         .hero-card {
             width: 100%;
             height: 100%;
@@ -90,7 +90,7 @@
             z-index: 0;
         }
 
-        /* 필름 그레인 효과 */
+        /* Film grain effect */
         .hero-card::before {
             content: '';
             position: absolute;
@@ -105,7 +105,7 @@
             mix-blend-mode: overlay;
         }
 
-        /* 오버레이 그라디언트 */
+        /* Overlay gradient */
         .overlay {
             position: absolute;
             top: 0;
@@ -125,7 +125,7 @@
             z-index: 2;
         }
 
-        /* 상단 내비게이션 */
+        /* Top navigation */
         .top-nav {
             position: absolute;
             top: 20px;
@@ -206,7 +206,7 @@
             color: var(--color-primary);
         }
 
-        /* 중앙 컨텐츠 (타이틀) */
+        /* Center content (title) */
         .center-content {
             position: absolute;
             top: 50%;
@@ -247,7 +247,7 @@
             letter-spacing: -1.456px;
         }
 
-        /* SIGN UP 버튼 */
+        /* SIGN UP button */
         .signup-section {
             position: absolute;
             bottom: 88px;
@@ -298,7 +298,7 @@
             transform: translateX(5px);
         }
 
-        /* 하단 링크 */
+        /* Footer links */
         .footer-links {
             position: absolute;
             bottom: 40px;
@@ -328,7 +328,7 @@
             color: var(--color-text-secondary);
         }
 
-        /* 모달 스타일 */
+        /* Modal styles */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -444,7 +444,7 @@
             flex-shrink: 0;
         }
 
-        /* 반응형 */
+        /* Responsive */
         @media (max-width: 1200px) {
             .main-wrapper {
                 gap: 0;
@@ -616,7 +616,7 @@
             }
         }
 
-        /* 페이드인 애니메이션 */
+        /* Fade-in animation */
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -640,7 +640,7 @@
             animation: fadeIn 1s ease-out 0.5s backwards;
         }
 
-        /* 챗봇 스타일 */
+        /* Chatbot styles */
         .chatbot-container {
             position: fixed;
             bottom: 24px;
@@ -879,7 +879,7 @@
     <div class="main-wrapper">
         <div class="container">
             <div class="hero-card">
-                <!-- 배경 이미지 슬라이더 -->
+                <!-- Background image slider -->
                 <div class="hero-images">
                     <img
                         src="/static/images/hero-1.webp"
@@ -954,12 +954,12 @@
                     >
                 </div>
 
-            <!-- 오버레이 -->
+            <!-- Overlay -->
             <div class="overlay"></div>
 
-            <!-- 상단 내비게이션 -->
+            <!-- Top navigation -->
             <div class="top-nav">
-                <!-- 로고 아이콘 -->
+                <!-- Logo icon -->
                 <a href="/" style="display: flex; align-items: center;">
                     <img src="/static/images/Logo.svg" alt="SCC Logo" class="logo-icon" onerror="this.style.display='none'">
                 </a>
@@ -977,7 +977,7 @@
                 </div>
             </div>
 
-            <!-- 중앙 타이틀 -->
+            <!-- Center title -->
             <div class="center-content">
                 <div class="title-container">
                     <div class="title-line">
@@ -992,7 +992,7 @@
                 </div>
             </div>
 
-            <!-- SIGN UP 버튼 -->
+            <!-- SIGN UP button -->
             <div class="signup-section">
                 <a href="/register_form" class="signup-btn" id="signupBtn">
                     <span>Sign Up</span>
@@ -1007,7 +1007,7 @@
 
     </div>
 </div>
-    <!-- 하단 링크 -->
+    <!-- Footer links -->
     <div class="footer-links">
         <a href="/terms-of-service" class="footer-link">terms of service</a>
         <span class="footer-separator">  |  </span>
@@ -1015,7 +1015,7 @@
     </div>
     </div>
 
-    <!-- About 모달 -->
+    <!-- About modal -->
     <div class="modal-overlay" id="aboutModal">
         <div class="modal-box">
             <div class="modal-header">
@@ -1046,25 +1046,25 @@
     </div>
 
     <script>
-        // 모달 요소
+        // Modal elements
         const aboutModal = document.getElementById('aboutModal');
         const closeModalBtn = document.getElementById('closeModal');
         const aboutBtn = document.querySelector('a[href="#about"]');
 
-        // About 버튼 클릭 시 모달 열기
+        // Open modal when About button is clicked
         aboutBtn.addEventListener('click', function(e) {
             e.preventDefault();
             aboutModal.classList.add('active');
             document.body.style.overflow = 'hidden';
         });
 
-        // X 버튼 클릭 시 모달 닫기
+        // Close modal when X button is clicked
         closeModalBtn.addEventListener('click', function() {
             aboutModal.classList.remove('active');
             document.body.style.overflow = '';
         });
 
-        // 모달 오버레이 클릭 시 모달 닫기
+        // Close modal when clicking on overlay
         aboutModal.addEventListener('click', function(e) {
             if (e.target === aboutModal) {
                 aboutModal.classList.remove('active');
@@ -1072,7 +1072,7 @@
             }
         });
 
-        // ESC 키로 모달 닫기
+        // Close modal with ESC key
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape' && aboutModal.classList.contains('active')) {
                 aboutModal.classList.remove('active');
@@ -1080,9 +1080,9 @@
             }
         });
 
-        // SIGN UP 버튼 클릭 시 register_form으로 이동
+        // Navigate to register_form when SIGN UP button is clicked
         document.getElementById('signupBtn').addEventListener('click', function(e) {
-            // 직접 이동 (Safari 호환성 개선)
+            // Direct navigation (improved Safari compatibility)
             window.location.href = '/register_form';
         });
 
@@ -1139,7 +1139,7 @@
         })();
     </script>
 
-    <!-- 챗봇 UI -->
+    <!-- Chatbot UI -->
     <div class="chatbot-container">
         <div class="chatbot-toggle" id="chatbot-toggle">
             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1169,10 +1169,10 @@
         
         <div class="chatbot-input-area">
             <div class="chatbot-input">
-                <input 
-                    type="text" 
-                    id="chatbot-input" 
-                    placeholder="메시지를 입력하세요..."
+                <input
+                    type="text"
+                    id="chatbot-input"
+                    placeholder="Type a message..."
                     autocomplete="off"
                 />
                 <button id="chatbot-send" class="chatbot-send-btn">
@@ -1186,50 +1186,50 @@
     </div>
 
     <script>
-        // 챗봇 로직
+        // Chatbot logic
         const chatbotToggle = document.getElementById('chatbot-toggle');
         const chatbotWindow = document.getElementById('chatbot-window');
         const chatbotClose = document.getElementById('chatbot-close');
         const chatbotInput = document.getElementById('chatbot-input');
         const chatbotSend = document.getElementById('chatbot-send');
         const chatbotMessages = document.getElementById('chatbot-messages');
-        
+
         let conversationHistory = [];
-        
-        // 챗봇 토글
+
+        // Toggle chatbot
         chatbotToggle.addEventListener('click', () => {
             chatbotWindow.classList.toggle('active');
             if (chatbotWindow.classList.contains('active')) {
                 chatbotInput.focus();
             }
         });
-        
+
         chatbotClose.addEventListener('click', () => {
             chatbotWindow.classList.remove('active');
         });
-        
-        // 메시지 추가 함수
+
+        // Add message function
         function addMessage(content, role) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `chat-message ${role}`;
-            
+
             const bubbleDiv = document.createElement('div');
             bubbleDiv.className = `message-bubble ${role}`;
             bubbleDiv.textContent = content;
-            
+
             messageDiv.appendChild(bubbleDiv);
             chatbotMessages.appendChild(messageDiv);
-            
-            // 스크롤을 최하단으로
+
+            // Scroll to bottom
             chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
         }
-        
-        // 타이핑 인디케이터 표시
+
+        // Show typing indicator
         function showTypingIndicator() {
             const typingDiv = document.createElement('div');
             typingDiv.className = 'chat-message';
             typingDiv.id = 'typing-indicator';
-            
+
             const bubbleDiv = document.createElement('div');
             bubbleDiv.className = 'message-bubble assistant typing-indicator';
             bubbleDiv.innerHTML = `
@@ -1237,36 +1237,36 @@
                 <div class="typing-dot"></div>
                 <div class="typing-dot"></div>
             `;
-            
+
             typingDiv.appendChild(bubbleDiv);
             chatbotMessages.appendChild(typingDiv);
             chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
         }
-        
-        // 타이핑 인디케이터 제거
+
+        // Hide typing indicator
         function hideTypingIndicator() {
             const typingIndicator = document.getElementById('typing-indicator');
             if (typingIndicator) {
                 typingIndicator.remove();
             }
         }
-        
-        // 메시지 전송
+
+        // Send message
         async function sendMessage() {
             const message = chatbotInput.value.trim();
             if (!message) return;
-            
-            // 사용자 메시지 추가
+
+            // Add user message
             addMessage(message, 'user');
             conversationHistory.push({ role: 'user', content: message });
-            
-            // 입력창 초기화 및 버튼 비활성화
+
+            // Clear input and disable button
             chatbotInput.value = '';
             chatbotSend.disabled = true;
-            
-            // 타이핑 인디케이터 표시
+
+            // Show typing indicator
             showTypingIndicator();
-            
+
             try {
                 const response = await fetch('/api/chat', {
                     method: 'POST',
@@ -1278,40 +1278,40 @@
                         conversation_history: conversationHistory
                     })
                 });
-                
+
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                
+
                 const data = await response.json();
-                
-                // 타이핑 인디케이터 제거
+
+                // Remove typing indicator
                 hideTypingIndicator();
-                
-                // 챗봇 응답 추가
+
+                // Add chatbot response
                 addMessage(data.response, 'assistant');
                 conversationHistory.push({ role: 'assistant', content: data.response });
-                
+
             } catch (error) {
                 console.error('Chatbot Error:', error);
                 hideTypingIndicator();
-                
-                // 더 자세한 에러 메시지
+
+                // More detailed error message
                 let errorMsg = 'Something went wrong. Please try again.';
-                
-                // 이메일로 문의 링크 추가
+
+                // Add error message
                 addMessage(errorMsg, 'assistant');
-                
+
             } finally {
                 chatbotSend.disabled = false;
                 chatbotInput.focus();
             }
         }
-        
-        // 전송 버튼 클릭
+
+        // Send button click
         chatbotSend.addEventListener('click', sendMessage);
-        
-        // Enter 키로 전송
+
+        // Send with Enter key
         chatbotInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();

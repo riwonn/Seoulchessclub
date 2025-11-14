@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -209,7 +209,7 @@
             opacity: 0.5;
         }
 
-        /* 모달 스타일 */
+        /* Modal styles */
         .modal {
             display: none;
             position: fixed;
@@ -616,9 +616,9 @@
             join us for chess, coffee, and great conversations
         </p>
 
-        <!-- 사용자 정보 -->
+        <!-- User Information -->
         <div class="user-info" id="userInfo" style="display: none;">
-            <p class="user-info-text"><strong id="userNameDisplay"></strong><span id="welcomeUserText">님, 오늘은 어떤 모임을 신청할까요?</span></p>
+            <p class="user-info-text"><strong id="userNameDisplay"></strong><span id="welcomeUserText">, which meeting would you like to join today?</span></p>
         </div>
 
         <div class="user-info" id="guestInfo" style="display: none;">
@@ -626,14 +626,14 @@
             <a href="/register_form" class="register-link" id="registerButtonText">Register</a>
         </div>
 
-        <!-- 아이콘 -->
+        <!-- Icons -->
         <div class="icons-row">
             <div class="icon-item">☕</div>
             <div class="icon-item">♞</div>
             <div class="icon-item">📖</div>
         </div>
 
-        <!-- 모임 리스트 -->
+        <!-- Meetings list -->
         <div class="meetings-grid">
             {% if meetings %}
                 {% for meeting in meetings %}
@@ -642,7 +642,7 @@
                     
                     <div class="meeting-info">
                         <span class="meeting-info-icon">📅</span>
-                        <span>{{ meeting.date_time.strftime('%Y년 %m월 %d일 %H:%M') }}</span>
+                        <span>{{ meeting.date_time.strftime('%B %d, %Y %H:%M') }}</span>
                     </div>
                     
                     <div class="meeting-info">
@@ -669,14 +669,14 @@
         </div>
     </div>
 
-    <!-- 1차 모달: 결제 안내 -->
+    <!-- Modal 1: Payment instructions -->
     <div id="paymentModal" class="modal">
         <div class="modal-content">
             <div class="modal-icon">💳</div>
             <h2 class="modal-title" id="paymentTitleText">Payment Instruction</h2>
             <p class="modal-message">
                 <span id="paymentMessageText">The list is confirmed after the payment.</span><br>
-                <strong style="color: #c084fc;" id="bankInfoText">카카오뱅크(Kakao Bank) 3333-24-5091670 김*현</strong>
+                <strong style="color: #c084fc;" id="bankInfoText">Kakao Bank 3333-24-5091670 Kim</strong>
             </p>
             <div style="margin: 20px 0; text-align: left; padding: 15px; background: rgba(192, 132, 252, 0.1); border-radius: 10px;">
                 <label style="display: flex; align-items: center; cursor: pointer; font-size: 15px; color: #e9b8ff;">
@@ -695,7 +695,7 @@
         </div>
     </div>
 
-    <!-- 2차 모달: 최종 확인 -->
+    <!-- Modal 2: Final confirmation -->
     <div id="confirmationModal" class="modal">
         <div class="modal-content">
             <div class="modal-icon">✅</div>
@@ -712,40 +712,40 @@
 
     <script>
         let currentMeetingId = null;
-        
-        // localStorage에서 user_id 가져오기 (없으면 1 사용)
+
+        // Get user_id from localStorage (default to 1 if not found)
         const USER_ID = parseInt(localStorage.getItem('user_id')) || 1;
         const USER_NAME = localStorage.getItem('user_name') || 'Guest';
 
-        // 다국어 텍스트 적용 함수
+        // Apply translations function
         function applyTranslations() {
-            // 페이지 제목 및 부제목
+            // Page title and subtitle
             document.getElementById('pageTitle').textContent = t('upcomingMeetings');
             document.getElementById('pageSubtitle').textContent = t('subtitle');
-            
-            // 사용자 환영 메시지
+
+            // User welcome message
             document.getElementById('welcomeUserText').textContent = t('welcomeUser');
             document.getElementById('registerPromptText').textContent = t('registerPrompt');
             document.getElementById('registerButtonText').textContent = t('registerButton');
-            
-            // 모임 카드 공통 텍스트
+
+            // Meeting card common text
             const capacityLabels = document.querySelectorAll('.capacity-label');
             capacityLabels.forEach(el => el.textContent = t('capacity'));
-            
+
             const peopleLabels = document.querySelectorAll('.people-label');
             peopleLabels.forEach(el => el.textContent = t('people'));
-            
+
             const registerBtnTexts = document.querySelectorAll('.register-btn-text');
             registerBtnTexts.forEach(el => el.textContent = t('registerMeeting'));
-            
-            // 빈 상태 메시지
+
+            // Empty state message
             const noMeetingsText = document.querySelector('.no-meetings-text');
             if (noMeetingsText) noMeetingsText.textContent = t('noMeetings');
-            
+
             const newMeetingSoonText = document.querySelector('.new-meeting-soon-text');
             if (newMeetingSoonText) newMeetingSoonText.textContent = t('newMeetingSoon');
-            
-            // 모달 텍스트
+
+            // Modal text
             document.getElementById('paymentTitleText').textContent = t('paymentTitle');
             document.getElementById('paymentMessageText').textContent = t('paymentMessage');
             document.getElementById('bankInfoText').textContent = t('bankInfo');
@@ -753,51 +753,51 @@
             document.getElementById('processingText').textContent = t('processing');
             document.getElementById('cancelButtonText').textContent = t('cancel');
             document.getElementById('confirmButtonText').textContent = t('confirm');
-            
+
             document.getElementById('confirmationTitleText').textContent = t('confirmationTitle');
             document.getElementById('confirmationMessageText').innerHTML = t('confirmationMessage').replace(/\n/g, '<br>');
             document.getElementById('confirmationButtonText').textContent = t('confirm');
         }
 
-        // 페이지 로드 시 사용자 정보 표시 및 다국어 적용
+        // Display user info on page load and apply translations
         window.addEventListener('DOMContentLoaded', function() {
-            // 다국어 적용
+            // Apply translations
             applyTranslations();
-            
+
             if (localStorage.getItem('user_id') && localStorage.getItem('user_name')) {
-                // 로그인된 사용자
+                // Logged in user
                 document.getElementById('userNameDisplay').textContent = USER_NAME;
                 document.getElementById('userInfo').style.display = 'block';
             } else {
-                // 게스트
+                // Guest
                 document.getElementById('guestInfo').style.display = 'block';
             }
         });
 
-        // 1단계: 참가 신청 버튼 클릭
+        // Step 1: Meeting registration button click
         function handleRegister(meetingId) {
             currentMeetingId = meetingId;
             showPaymentModal();
         }
 
-        // 결제 안내 모달 표시
+        // Show payment instructions modal
         function showPaymentModal() {
             document.getElementById('paymentModal').classList.add('show');
-            // 모달 열 때마다 체크박스 초기화
+            // Reset checkbox every time modal opens
             document.getElementById('paidCheckbox').checked = false;
             toggleConfirmButton();
         }
 
-        // 결제 안내 모달 닫기
+        // Close payment instructions modal
         function closePaymentModal() {
             document.getElementById('paymentModal').classList.remove('show');
             currentMeetingId = null;
-            // 체크박스 초기화
+            // Reset checkbox
             document.getElementById('paidCheckbox').checked = false;
             toggleConfirmButton();
         }
 
-        // Confirm 버튼 활성화/비활성화
+        // Enable/disable Confirm button
         function toggleConfirmButton() {
             const checkbox = document.getElementById('paidCheckbox');
             const confirmBtn = document.getElementById('confirmButton');
@@ -813,17 +813,17 @@
             }
         }
 
-        // 2단계: 결제 확인 (API 호출)
+        // Step 2: Confirm payment (API call)
         async function confirmPayment() {
             const loadingDiv = document.getElementById('paymentLoading');
             const buttonsDiv = document.getElementById('paymentButtons');
 
-            // 로딩 표시
+            // Show loading
             buttonsDiv.style.display = 'none';
             loadingDiv.classList.add('show');
 
             try {
-                // POST /meetings/register_interest API 호출
+                // POST /meetings/register_interest API call
                 const response = await fetch('/meetings/register_interest', {
                     method: 'POST',
                     headers: {
@@ -838,13 +838,13 @@
                 const data = await response.json();
 
                 if (!response.ok) {
-                    // 에러 처리
+                    // Handle error
                     alert(`${t('error')}: ${data.detail || t('errorRegistering')}`);
                     closePaymentModal();
                     return;
                 }
 
-                // 성공: 1차 모달 닫고 2차 모달 표시
+                // Success: Close first modal and show second modal
                 closePaymentModal();
                 showConfirmationModal();
 
@@ -853,27 +853,27 @@
                 alert(t('errorServer'));
                 closePaymentModal();
             } finally {
-                // 로딩 숨기기 및 버튼 다시 표시
+                // Hide loading and show buttons again
                 loadingDiv.classList.remove('show');
                 buttonsDiv.style.display = 'flex';
             }
         }
 
-        // 최종 확인 모달 표시
+        // Show final confirmation modal
         function showConfirmationModal() {
             document.getElementById('confirmationModal').classList.add('show');
         }
 
-        // 최종 확인 모달 닫기
+        // Close final confirmation modal
         function closeConfirmationModal() {
             document.getElementById('confirmationModal').classList.remove('show');
             currentMeetingId = null;
-            
-            // 페이지 새로고침 (선택사항)
+
+            // Reload page (optional)
             // location.reload();
         }
 
-        // ESC 키로 모달 닫기
+        // Close modal with ESC key
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
                 closePaymentModal();
@@ -881,7 +881,7 @@
             }
         });
 
-        // 모달 배경 클릭 시 닫기
+        // Close modal when clicking background
         document.getElementById('paymentModal').addEventListener('click', function(event) {
             if (event.target === this) {
                 closePaymentModal();
