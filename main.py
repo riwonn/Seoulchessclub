@@ -76,21 +76,13 @@ async def log_requests(request: Request, call_next):
     return response
 
 # Health check endpoint
-@app.get("/")
-async def root():
-    """Health check endpoint"""
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for monitoring"""
     return {
         "status": "ok",
         "service": "Seoul Chess Club API",
-        "version": "1.0.0"
-    }
-
-@app.get("/health")
-async def health_check():
-    """Detailed health check endpoint"""
-    return {
-        "status": "healthy",
-        "database": "connected",
+        "version": "1.0.0",
         "timestamp": datetime.utcnow().isoformat()
     }
 
