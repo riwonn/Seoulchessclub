@@ -15,7 +15,7 @@ from dotenv import load_dotenv
 from sqlalchemy.orm import Session, joinedload
 from database import VerificationCode, SessionLocal, User, Meeting, UserMeeting, get_db, init_db
 from schemas import SMSRequest, SMSVerify, UserCreate, UserOut, CSParseRequest, CSParseResponse, MeetingCreate, MeetingOut, UserMeetingInterest, LoginRequest, LoginResponse, AppleLoginRequest, KakaoLoginRequest, SocialLoginResponse, ChatRequest, ChatResponse, AdminLoginRequest
-from sqlalchemy.exc import IntegrityError # 데이터베이스 무결성 오류 처리용
+from sqlalchemy.exc import IntegrityError # For handling database integrity errors
 import json
 import requests
 from auth import create_access_token, get_current_user, get_current_user_optional
@@ -92,7 +92,7 @@ async def startup_event():
         print("✅ Database initialized successfully!")
         print("=" * 60)
         
-        # 챗봇 초기화 (startup 시 문제를 바로 확인하기 위해)
+        # Initialize chatbot (to immediately identify any issues at startup)
         print("🤖 Initializing RAG Chatbot...")
         try:
             from rag_chatbot import get_chatbot
@@ -997,7 +997,7 @@ async def register_interest_for_meeting(
 
 
 # --------------------
-# 챗봇 API (RAG 기반 LLM)
+# Chatbot API (RAG-based LLM)
 # --------------------
 from rag_chatbot import get_chatbot
 
@@ -1007,35 +1007,35 @@ async def chat_with_bot(
     current_user: User = Depends(get_current_user_optional)
 ):
     """
-    RAG 기반 챗봇 API
-    
+    RAG-based chatbot API
+
     Args:
-        request: 챗봇 요청 (메시지 + 대화 히스토리)
-        current_user: 인증된 사용자 (선택)
-    
+        request: Chatbot request (message + conversation history)
+        current_user: Authenticated user (optional)
+
     Returns:
-        챗봇 응답
+        Chatbot response
     """
     try:
         chatbot = get_chatbot()
-        
-        # 대화 히스토리 변환
+
+        # Convert conversation history
         conversation_history = [
             {"role": msg.role, "content": msg.content}
             for msg in request.conversation_history
         ]
-        
-        # 챗봇 응답 생성
+
+        # Generate chatbot response
         response_text = chatbot.chat(
             user_message=request.message,
             conversation_history=conversation_history
         )
-        
+
         return ChatResponse(
             response=response_text,
             timestamp=datetime.utcnow()
         )
-        
+
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
