@@ -823,16 +823,21 @@
             loadingDiv.classList.add('show');
 
             try {
-                // POST /meetings/register_interest API 호출
-                const response = await fetch('/meetings/register_interest', {
+                // Get token from localStorage
+                const token = localStorage.getItem('access_token');
+                if (!token) {
+                    alert('Please login first');
+                    window.location.href = '/register_form';
+                    return;
+                }
+
+                // POST /meetings/register_interest API call
+                const response = await fetch(`/meetings/register_interest?meeting_id=${currentMeetingId}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        user_id: USER_ID,
-                        meeting_id: currentMeetingId
-                    })
+                        'Authorization': `Bearer ${token}`
+                    }
                 });
 
                 const data = await response.json();

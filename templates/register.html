@@ -980,6 +980,9 @@
                     // 사용자 ID 저장 (모임 신청에 사용)
                     localStorage.setItem('user_id', data.id);
                     localStorage.setItem('user_name', data.name);
+                    if (data.access_token) {
+                        localStorage.setItem('access_token', data.access_token);
+                    }
                     
                     // 2초 후 모임 목록으로 이동
                     setTimeout(() => {

@@ -617,13 +617,12 @@ async def kakao_login(request: KakaoLoginRequest, db: Session = Depends(get_db))
 # =========================================================================
 # 💡 3. 사용자 등록 엔드포인트 (/register)
 # =========================================================================
-@app.post("/register", response_model=UserOut, status_code=status.HTTP_201_CREATED)
+@app.post("/register", status_code=status.HTTP_201_CREATED)
 async def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
     """
-    사용자 등록 API (순수 회원 가입 기능만 수행).
-    모임 신청은 별도의 /meetings/register 엔드포인트를 사용합니다.
+    User registration API - returns user data and access token.
     """
-    # 1. 자동 마감 로직 - 최대 30명 제한
+    # 1. Auto-close registration at 30 users
     MAX_CAPACITY = 30
     current_count = db.query(User).count()
     if current_count >= MAX_CAPACITY:
@@ -632,13 +631,13 @@ async def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
             detail=f"Registration is closed. Maximum capacity of {MAX_CAPACITY} users reached."
         )
 
-    # 2. 전화번호로 기존 사용자 조회
+    # 2. Check for existing user by phone number
     existing_user = db.query(User).filter(User.phone_number == user_data.phone_number).first()
 
-    # 4. 트랜잭션으로 사용자 등록/업데이트 처리
+    # 3. Register or update user
     try:
         if existing_user:
-            # 기존 사용자: 필드 업데이트 및 total_visits 1 증가
+            # Update existing user
             existing_user.name = user_data.name
             existing_user.email = user_data.email
             existing_user.gender = user_data.gender
@@ -647,12 +646,12 @@ async def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
             existing_user.chess_rating = user_data.chess_rating
             existing_user.total_visits += 1
             existing_user.updated_at = datetime.utcnow()
-            
+
             db.commit()
             db.refresh(existing_user)
-            return existing_user
+            user = existing_user
         else:
-            # 신규 사용자: total_visits를 1로 설정하여 새 레코드 생성
+            # Create new user
             new_user = User(
                 name=user_data.name,
                 phone_number=user_data.phone_number,
@@ -663,11 +662,30 @@ async def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
                 chess_rating=user_data.chess_rating,
                 total_visits=1
             )
-            
+
             db.add(new_user)
             db.commit()
             db.refresh(new_user)
-            return new_user
+            user = new_user
+
+        # Generate access token
+        access_token = create_access_token(
+            data={"user_id": user.id, "phone_number": user.phone_number}
+        )
+
+        return {
+            "id": user.id,
+            "name": user.name,
+            "phone_number": user.phone_number,
+            "email": user.email,
+            "gender": user.gender,
+            "birth_year": user.birth_year,
+            "chess_experience": user.chess_experience,
+            "chess_rating": user.chess_rating,
+            "total_visits": user.total_visits,
+            "access_token": access_token,
+            "token_type": "bearer"
+        }
             
     except IntegrityError:
         db.rollback()
