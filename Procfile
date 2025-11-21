@@ -1,1 +1,1 @@
-web: gunicorn main:app --workers 1 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT --timeout 120 --graceful-timeout 120 --log-level debug --access-logfile - --error-logfile -
+web: uvicorn main:app --host 0.0.0.0 --port $PORT
