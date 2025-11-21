@@ -1071,24 +1071,35 @@
             // Only run slider if we have multiple images
             if (heroImages.length <= 1) return;
 
-            function showSlide(index) {
-                // Remove active class from all images
-                heroImages.forEach((img, i) => {
-                    img.classList.remove('active', 'prev');
+            // Filter out images that failed to load
+            const validImages = Array.from(heroImages).filter(img => {
+                return img.style.display !== 'none' && !img.hasAttribute('data-error');
+            });
 
-                    if (i === index) {
-                        // Set new active image
-                        img.classList.add('active');
-                    } else if (i === currentSlide) {
-                        // Previous active becomes prev for smooth transition
-                        img.classList.add('prev');
-                    }
+            // If no valid images, don't run slider
+            if (validImages.length <= 1) return;
+
+            function showSlide(newIndex, oldIndex) {
+                // Remove active and prev classes from all images
+                validImages.forEach(img => {
+                    img.classList.remove('active', 'prev');
                 });
+
+                // Add prev class to old slide for smooth transition
+                if (oldIndex >= 0 && oldIndex < validImages.length) {
+                    validImages[oldIndex].classList.add('prev');
+                }
+
+                // Add active class to new slide
+                if (newIndex >= 0 && newIndex < validImages.length) {
+                    validImages[newIndex].classList.add('active');
+                }
             }
 
             function nextSlide() {
-                currentSlide = (currentSlide + 1) % heroImages.length;
-                showSlide(currentSlide);
+                const oldSlide = currentSlide;
+                currentSlide = (currentSlide + 1) % validImages.length;
+                showSlide(currentSlide, oldSlide);
             }
 
             // Start automatic slideshow
@@ -1097,19 +1108,32 @@
             // Pause on hover (optional - improves UX)
             const heroCard = document.querySelector('.hero-card');
 
-            heroCard.addEventListener('mouseenter', function() {
-                clearInterval(sliderTimer);
-            });
+            if (heroCard) {
+                heroCard.addEventListener('mouseenter', function() {
+                    clearInterval(sliderTimer);
+                });
 
-            heroCard.addEventListener('mouseleave', function() {
-                sliderTimer = setInterval(nextSlide, slideInterval);
-            });
+                heroCard.addEventListener('mouseleave', function() {
+                    sliderTimer = setInterval(nextSlide, slideInterval);
+                });
+            }
 
             // Preload all images for smooth transitions
-            heroImages.forEach(img => {
+            validImages.forEach(img => {
                 const preloadImg = new Image();
                 preloadImg.src = img.src;
+
+                // Mark failed images
+                preloadImg.onerror = function() {
+                    img.setAttribute('data-error', 'true');
+                    img.style.display = 'none';
+                };
             });
+
+            // Ensure first slide is visible
+            if (validImages.length > 0) {
+                validImages[0].classList.add('active');
+            }
         })();
     </script>
 
