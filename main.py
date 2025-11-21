@@ -177,21 +177,20 @@ async def root(request: Request):
 @app.get("/dashboard", response_class=HTMLResponse)
 async def dashboard(
     request: Request,
+    code: str = None,
     current_user: User = Depends(get_current_user_optional),
     db: Session = Depends(get_db)
 ):
-    """운영자 대시보드 페이지 (JWT 기반 관리자 제한)"""
-    # 1) 관리자 코드 우선 체크 (헤더): X-Admin-Code
+    """Admin dashboard page"""
+    # 1) Check admin code in query param or header
     admin_code_header = request.headers.get("X-Admin-Code")
-    if ADMIN_ACCESS_CODE and admin_code_header and secrets.compare_digest(admin_code_header, ADMIN_ACCESS_CODE):
+    admin_code = code or admin_code_header
+
+    if ADMIN_ACCESS_CODE and admin_code and secrets.compare_digest(admin_code, ADMIN_ACCESS_CODE):
+        # Admin code valid - allow access
         pass
-    else:
-        # 2) JWT 기반 관리자 체크 (email 또는 phone)
-        if current_user is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Missing or invalid token"
-            )
+    elif current_user is not None:
+        # 2) JWT-based admin check
         is_admin_email = ADMIN_EMAIL and current_user.email == ADMIN_EMAIL
         is_admin_phone = ADMIN_PHONE_NUMBER and current_user.phone_number == ADMIN_PHONE_NUMBER
         if not (is_admin_email or is_admin_phone):
@@ -199,7 +198,11 @@ async def dashboard(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Access restricted to admin"
             )
-    # 모든 사용자 조회
+    else:
+        # No valid auth - redirect to login
+        return RedirectResponse(url="/admin-login", status_code=302)
+
+    # Get all users
     users = db.query(User).all()
     return templates.TemplateResponse("dashboard.html", {"request": request, "users": users})
 
