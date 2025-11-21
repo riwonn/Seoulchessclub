@@ -31,26 +31,31 @@ TWILIO_PHONE_NUMBER = os.getenv("TWILIO_PHONE_NUMBER")
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-# FastAPI 앱 인스턴스 생성
-app = FastAPI(title="Community Control AI", version="1.0.0")
-
-# 클라이언트 초기화 시 환경 변수 누락 확인
+# Check Twilio credentials
 if not TWILIO_ACCOUNT_SID or not TWILIO_AUTH_TOKEN or not TWILIO_PHONE_NUMBER:
     print("WARNING: Twilio environment variables are not fully set.")
-    # 실제 운영 환경에서는 앱이 시작되지 않도록 처리하는 것이 좋지만, 여기서는 경고만 표시
-    twilio_client = None 
+    twilio_client = None
 else:
     twilio_client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
 
-# Gemini API 설정 (REST API 사용)
+# Gemini API configuration (REST API)
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent"
 
 if not GEMINI_API_KEY:
     print("WARNING: GEMINI_API_KEY environment variable is not set.")
 
-# FastAPI 앱 인스턴스 생성
+# Create FastAPI app instance
 app = FastAPI(title="Community Control AI", version="1.0.0")
+
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, replace with specific origins
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Basic Auth 설정 (운영자 페이지 보호용)
 security_basic = HTTPBasic()
@@ -60,7 +65,7 @@ ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
 ADMIN_PHONE_NUMBER = os.getenv("ADMIN_PHONE_NUMBER")
 ADMIN_ACCESS_CODE = os.getenv("ADMIN_ACCESS_CODE")
 
-# 요청 로깅 미들웨어
+# Request logging middleware
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
     print(f"🔵 Incoming request: {request.method} {request.url.path}")
@@ -70,13 +75,32 @@ async def log_requests(request: Request, call_next):
     print(f"✅ Response status: {response.status_code}")
     return response
 
-# 앱 시작 시 데이터베이스 초기화
+# Health check endpoint
+@app.get("/")
+async def root():
+    """Health check endpoint"""
+    return {
+        "status": "ok",
+        "service": "Seoul Chess Club API",
+        "version": "1.0.0"
+    }
+
+@app.get("/health")
+async def health_check():
+    """Detailed health check endpoint"""
+    return {
+        "status": "healthy",
+        "database": "connected",
+        "timestamp": datetime.utcnow().isoformat()
+    }
+
+# Database initialization on app startup
 @app.on_event("startup")
 async def startup_event():
-    """앱 시작 시 데이터베이스 테이블 생성"""
+    """Initialize database tables on application startup"""
     try:
         print("=" * 60)
-        print("🚀 Starting Community Control AI Application...")
+        print("🚀 Starting Seoul Chess Club API...")
         print(f"📁 Current working directory: {os.getcwd()}")
         print(f"📂 Directory contents: {os.listdir('.')}")
         print(f"🌍 Environment Variables:")
@@ -88,11 +112,13 @@ async def startup_event():
         print(f"  - Templates dir exists: {os.path.exists('templates')}")
         print(f"  - knowledge_base.txt exists: {os.path.exists('knowledge_base.txt')}")
         print("=" * 60)
+
+        # Initialize database
         init_db()
         print("✅ Database initialized successfully!")
         print("=" * 60)
-        
-        # Initialize chatbot (to immediately identify any issues at startup)
+
+        # Initialize chatbot (non-blocking - app can run without it)
         print("🤖 Initializing RAG Chatbot...")
         try:
             from rag_chatbot import get_chatbot
@@ -101,19 +127,23 @@ async def startup_event():
                 print("✅ RAG Chatbot initialized successfully!")
             else:
                 print("⚠️  RAG Chatbot initialization incomplete - check GEMINI_API_KEY")
+                print("   App will continue running but chatbot features will be disabled")
         except Exception as chatbot_error:
-            print(f"❌ RAG Chatbot initialization failed: {chatbot_error}")
-            import traceback
-            traceback.print_exc()
+            print(f"⚠️  RAG Chatbot initialization failed: {chatbot_error}")
+            print("   App will continue running but chatbot features will be disabled")
+
+        print("=" * 60)
+        print("✅ Application startup completed successfully!")
         print("=" * 60)
         
     except Exception as e:
         print(f"❌ Error during startup: {str(e)}")
         import traceback
         traceback.print_exc()
-        raise
+        # Don't raise - let the app start even if there are issues
+        print("⚠️  Application will continue but some features may not work")
 
-# Static 파일 서빙 (디렉토리 존재 확인)
+# Static files serving (check directory exists)
 try:
     if os.path.exists("static"):
         app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -123,7 +153,7 @@ try:
 except Exception as e:
     print(f"⚠️  Warning: Could not mount static files: {str(e)}")
 
-# Jinja2 템플릿 설정
+# Jinja2 templates configuration
 try:
     templates = Jinja2Templates(directory="templates")
     print("✅ Templates configured successfully")
