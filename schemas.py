@@ -110,6 +110,7 @@ class MeetingBase(BaseModel):
     date_time: datetime
     location: str
     capacity: int
+    price: float = 10000.0  # 모임 참가비 (기본값: 10,000원)
 
 
 class MeetingCreate(MeetingBase):
@@ -122,7 +123,7 @@ class MeetingOut(MeetingBase):
     id: int
     created_at: datetime
     participants: List[UserMeetingOut] = []  # 모임에 참여한 사용자 목록
-    
+
     class Config:
         from_attributes = True
 
@@ -215,3 +216,115 @@ class ChatResponse(BaseModel):
     """챗봇 응답 스키마"""
     response: str
     timestamp: datetime
+
+
+# --------------------
+# 결제 관련 스키마 (Payment Schemas)
+# --------------------
+class PaymentTypeEnum(str, Enum):
+    MEETING = "meeting"
+    MEMBERSHIP = "membership"
+
+
+class PaymentStatusEnum(str, Enum):
+    READY = "ready"
+    APPROVED = "approved"
+    CANCELLED = "cancelled"
+    FAILED = "failed"
+    REFUNDED = "refunded"
+
+
+class MembershipTypeEnum(str, Enum):
+    MONTHLY = "monthly"
+    ANNUAL = "annual"
+
+
+class PaymentCreateRequest(BaseModel):
+    """결제 생성 요청 스키마"""
+    payment_type: PaymentTypeEnum
+    meeting_id: Optional[int] = None  # 모임 결제 시 필수
+    membership_type: Optional[MembershipTypeEnum] = None  # 멤버십 결제 시 필수
+    amount: float
+
+
+class KakaoPayReadyResponse(BaseModel):
+    """카카오페이 결제 준비 응답 스키마"""
+    tid: str  # 결제 고유번호
+    next_redirect_pc_url: str  # PC 웹 결제 URL
+    next_redirect_mobile_url: str  # 모바일 웹 결제 URL
+    next_redirect_app_url: str  # 앱 결제 URL
+    partner_order_id: str
+    created_at: datetime
+
+
+class KakaoPayApproveRequest(BaseModel):
+    """카카오페이 결제 승인 요청 스키마"""
+    pg_token: str  # 카카오페이에서 리다이렉트 시 전달되는 토큰
+    partner_order_id: str
+
+
+class KakaoPayApproveResponse(BaseModel):
+    """카카오페이 결제 승인 응답 스키마"""
+    aid: str  # 요청 고유번호
+    tid: str  # 결제 고유번호
+    partner_order_id: str
+    partner_user_id: str
+    payment_method_type: str  # 결제 수단 (CARD, MONEY 등)
+    amount: dict  # 결제 금액 정보
+    item_name: str
+    approved_at: datetime
+    status: str
+
+
+class PaymentCancelRequest(BaseModel):
+    """결제 취소 요청 스키마"""
+    payment_id: int
+    cancel_reason: str
+
+
+class PaymentRefundRequest(BaseModel):
+    """환불 요청 스키마"""
+    payment_id: int
+    refund_amount: float
+    refund_reason: str
+
+
+class PaymentOut(BaseModel):
+    """결제 출력 스키마"""
+    id: int
+    user_id: int
+    payment_type: str
+    meeting_id: Optional[int] = None
+    membership_id: Optional[int] = None
+    amount: float
+    status: str
+    partner_order_id: str
+    tid: Optional[str] = None
+    created_at: datetime
+    approved_at: Optional[datetime] = None
+    cancelled_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
+class MembershipOut(BaseModel):
+    """멤버십 출력 스키마"""
+    id: int
+    user_id: int
+    membership_type: str
+    status: str
+    start_date: datetime
+    end_date: datetime
+    auto_renew: bool
+    price: float
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class MembershipCreateRequest(BaseModel):
+    """멤버십 생성 요청 스키마"""
+    membership_type: MembershipTypeEnum

@@ -639,22 +639,27 @@
                 {% for meeting in meetings %}
                 <div class="meeting-card">
                     <h3 class="meeting-title">{{ meeting.title }}</h3>
-                    
+
                     <div class="meeting-info">
                         <span class="meeting-info-icon">📅</span>
                         <span>{{ meeting.date_time.strftime('%Y년 %m월 %d일 %H:%M') }}</span>
                     </div>
-                    
+
                     <div class="meeting-info">
                         <span class="meeting-info-icon">📍</span>
                         <span>{{ meeting.location }}</span>
                     </div>
-                    
+
+                    <div class="meeting-info">
+                        <span class="meeting-info-icon">💰</span>
+                        <span style="font-weight: 600; color: #e8a4d8;">₩{{ "{:,}".format(int(meeting.price)) }}</span>
+                    </div>
+
                     <div class="meeting-capacity">
                         <span class="capacity-label">Capacity</span>: {{ meeting.capacity }} <span class="people-label">people</span>
                     </div>
-                    
-                    <button class="register-btn" onclick="handleRegister('{{ meeting.id }}')">
+
+                    <button class="register-btn" onclick="handleRegister({{ meeting.id }}, {{ meeting.price }})">
                         <span class="register-btn-text">Register</span>
                     </button>
                 </div>
@@ -673,24 +678,58 @@
     <div id="paymentModal" class="modal">
         <div class="modal-content">
             <div class="modal-icon">💳</div>
-            <h2 class="modal-title" id="paymentTitleText">Payment Instruction</h2>
+            <h2 class="modal-title" id="paymentTitleText">Meeting Registration Payment</h2>
             <p class="modal-message">
-                <span id="paymentMessageText">The list is confirmed after the payment.</span><br>
-                <strong style="color: #c084fc;" id="bankInfoText">카카오뱅크(Kakao Bank) 3333-24-5091670 김*현</strong>
+                <span id="paymentMessageText">Please complete the payment to confirm your meeting registration.</span>
             </p>
-            <div style="margin: 20px 0; text-align: left; padding: 15px; background: rgba(192, 132, 252, 0.1); border-radius: 10px;">
-                <label style="display: flex; align-items: center; cursor: pointer; font-size: 15px; color: #e9b8ff;">
-                    <input type="checkbox" id="paidCheckbox" onchange="toggleConfirmButton()" style="width: 20px; height: 20px; margin-right: 10px; cursor: pointer; accent-color: #c084fc;">
-                    <span id="iPaidText">I paid</span>
-                </label>
+
+            <!-- 가격 정보 -->
+            <div style="margin: 20px 0; padding: 20px; background: rgba(192, 132, 252, 0.15); border-radius: 12px; border: 1px solid rgba(232, 164, 216, 0.3);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <span style="color: #e8d4f0; font-size: 15px;">Meeting Fee:</span>
+                    <span id="meeting-price-display" style="color: #ffffff; font-size: 20px; font-weight: 600;">₩10,000</span>
+                </div>
+                <div style="font-size: 13px; color: #d1b3e6; margin-top: 8px;">
+                    <span id="paymentNoteText">Includes venue rental and materials</span>
+                </div>
             </div>
+
+            <!-- 카카오페이 결제 버튼 -->
+            <div style="margin: 25px 0;">
+                <button
+                    onclick="payWithKakaoPay()"
+                    style="width: 100%; padding: 16px; background: #FEE500; color: #000000; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s ease;"
+                    onmouseover="this.style.background='#FFE500'"
+                    onmouseout="this.style.background='#FEE500'">
+                    <span style="font-size: 20px;">💬</span>
+                    <span>Pay with Kakao Pay</span>
+                </button>
+            </div>
+
+            <!-- 또는 수동 결제 옵션 -->
+            <div style="text-align: center; margin: 20px 0; color: #b896d1;">
+                <span style="font-size: 13px;">or transfer manually</span>
+            </div>
+
+            <div style="margin: 15px 0; text-align: left; padding: 15px; background: rgba(192, 132, 252, 0.1); border-radius: 10px; border: 1px solid rgba(232, 164, 216, 0.2);">
+                <div style="font-size: 13px; color: #d1b3e6; margin-bottom: 8px;">Bank Transfer Information:</div>
+                <strong style="color: #c084fc; font-size: 14px;" id="bankInfoText">카카오뱅크 3333-24-5091670 김*현</strong>
+                <div style="margin-top: 12px;">
+                    <label style="display: flex; align-items: center; cursor: pointer; font-size: 14px; color: #e9b8ff;">
+                        <input type="checkbox" id="paidCheckbox" onchange="toggleConfirmButton()" style="width: 18px; height: 18px; margin-right: 10px; cursor: pointer; accent-color: #c084fc;">
+                        <span id="iPaidText">I have completed the bank transfer</span>
+                    </label>
+                </div>
+            </div>
+
             <div class="loading" id="paymentLoading">
                 <div class="spinner"></div>
-                <p style="margin-top: 15px; color: #d1b3e6;" id="processingText">Processing...</p>
+                <p style="margin-top: 15px; color: #d1b3e6;" id="processingText">Processing payment...</p>
             </div>
+
             <div class="modal-buttons" id="paymentButtons">
                 <button class="modal-btn modal-btn-secondary" onclick="closePaymentModal()" id="cancelButtonText">Cancel</button>
-                <button class="modal-btn modal-btn-primary" id="confirmButton" onclick="confirmPayment()" disabled style="opacity: 0.5; cursor: not-allowed;"><span id="confirmButtonText">Confirm</span></button>
+                <button class="modal-btn modal-btn-primary" id="confirmButton" onclick="confirmManualPayment()" disabled style="opacity: 0.5; cursor: not-allowed;"><span id="confirmButtonText">Confirm Manual Payment</span></button>
             </div>
         </div>
     </div>
@@ -774,14 +813,22 @@
             }
         });
 
+        // 전역 변수
+        let currentMeetingPrice = 10000;
+
         // 1단계: 참가 신청 버튼 클릭
-        function handleRegister(meetingId) {
+        function handleRegister(meetingId, meetingPrice) {
             currentMeetingId = meetingId;
+            currentMeetingPrice = meetingPrice;
             showPaymentModal();
         }
 
         // 결제 안내 모달 표시
         function showPaymentModal() {
+            // 가격 표시 업데이트
+            document.getElementById('meeting-price-display').textContent =
+                '₩' + currentMeetingPrice.toLocaleString('ko-KR');
+
             document.getElementById('paymentModal').classList.add('show');
             // 모달 열 때마다 체크박스 초기화
             document.getElementById('paidCheckbox').checked = false;
@@ -813,8 +860,65 @@
             }
         }
 
-        // 2단계: 결제 확인 (API 호출)
-        async function confirmPayment() {
+        // 카카오페이 결제 시작
+        async function payWithKakaoPay() {
+            const loadingDiv = document.getElementById('paymentLoading');
+            const buttonsDiv = document.getElementById('paymentButtons');
+
+            // 로딩 표시
+            buttonsDiv.style.display = 'none';
+            loadingDiv.classList.add('show');
+
+            try {
+                // Get token from localStorage
+                const token = localStorage.getItem('access_token');
+                if (!token) {
+                    alert('Please login first');
+                    window.location.href = '/register_form';
+                    return;
+                }
+
+                // 카카오페이 결제 준비 API 호출
+                const response = await fetch('/payment/ready', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        payment_type: 'meeting',
+                        meeting_id: currentMeetingId,
+                        amount: currentMeetingPrice
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    alert(`Payment initialization failed: ${data.detail || 'Unknown error'}`);
+                    loadingDiv.classList.remove('show');
+                    buttonsDiv.style.display = 'flex';
+                    return;
+                }
+
+                // 카카오페이 결제 페이지로 리다이렉트
+                // 모바일/PC 구분하여 적절한 URL 사용
+                const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                const paymentUrl = isMobile ? data.next_redirect_mobile_url : data.next_redirect_pc_url;
+
+                // 결제 페이지로 이동
+                window.location.href = paymentUrl;
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Payment initialization failed. Please try again.');
+                loadingDiv.classList.remove('show');
+                buttonsDiv.style.display = 'flex';
+            }
+        }
+
+        // 2단계: 수동 결제 확인 (API 호출)
+        async function confirmManualPayment() {
             const loadingDiv = document.getElementById('paymentLoading');
             const buttonsDiv = document.getElementById('paymentButtons');
 

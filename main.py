@@ -13,13 +13,14 @@ from datetime import datetime, timedelta
 import random
 from dotenv import load_dotenv
 from sqlalchemy.orm import Session, joinedload
-from database import VerificationCode, SessionLocal, User, Meeting, UserMeeting, get_db, init_db
-from schemas import SMSRequest, SMSVerify, UserCreate, UserOut, CSParseRequest, CSParseResponse, MeetingCreate, MeetingOut, UserMeetingInterest, LoginRequest, LoginResponse, AppleLoginRequest, KakaoLoginRequest, SocialLoginResponse, ChatRequest, ChatResponse, AdminLoginRequest
+from database import VerificationCode, SessionLocal, User, Meeting, UserMeeting, Payment, Membership, get_db, init_db
+from schemas import SMSRequest, SMSVerify, UserCreate, UserOut, CSParseRequest, CSParseResponse, MeetingCreate, MeetingOut, UserMeetingInterest, LoginRequest, LoginResponse, AppleLoginRequest, KakaoLoginRequest, SocialLoginResponse, ChatRequest, ChatResponse, AdminLoginRequest, PaymentCreateRequest, KakaoPayReadyResponse, KakaoPayApproveRequest, PaymentOut, MembershipOut, PaymentCancelRequest, PaymentRefundRequest, MembershipCreateRequest
 from sqlalchemy.exc import IntegrityError # For handling database integrity errors
 import json
 import requests
 from auth import create_access_token, get_current_user, get_current_user_optional
 from social_auth import verify_apple_token, get_kakao_user_info, extract_apple_user_info
+from payment import kakao_pay_client
 
 # .env 파일 로드
 load_dotenv()
@@ -1132,3 +1133,506 @@ async def admin_login(request: AdminLoginRequest, db: Session = Depends(get_db))
         token_type="bearer",
         user=admin_user
     )
+
+
+# =========================================================================
+# 💳 결제 관련 엔드포인트 (Payment Endpoints)
+# =========================================================================
+
+@app.post("/payment/ready", response_model=KakaoPayReadyResponse)
+async def payment_ready(
+    payment_request: PaymentCreateRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    카카오페이 결제 준비 API
+    - 모임 등록비 또는 멤버십 구독 결제를 준비합니다
+    """
+    try:
+        # 결제 대상 확인 및 상품명 설정
+        item_name = ""
+        meeting = None
+        membership = None
+
+        # 실제 결제 금액 설정
+        actual_amount = payment_request.amount
+
+        if payment_request.payment_type == "meeting":
+            if not payment_request.meeting_id:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="meeting_id is required for meeting payment"
+                )
+
+            meeting = db.query(Meeting).filter(Meeting.id == payment_request.meeting_id).first()
+            if not meeting:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Meeting not found"
+                )
+            item_name = f"Chess Meeting: {meeting.title}"
+            # 모임의 실제 가격 사용
+            actual_amount = meeting.price
+
+        elif payment_request.payment_type == "membership":
+            if not payment_request.membership_type:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="membership_type is required for membership payment"
+                )
+
+            membership_type_kr = "월간" if payment_request.membership_type == "monthly" else "연간"
+            item_name = f"Seoul Chess Club {membership_type_kr} 멤버십"
+            # 멤버십 타입에 따라 가격 설정
+            actual_amount = 30000 if payment_request.membership_type == "monthly" else 300000
+
+        # 고유한 주문번호 생성
+        partner_order_id = f"ORDER_{current_user.id}_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}_{random.randint(1000, 9999)}"
+        partner_user_id = str(current_user.id)
+
+        # Payment 레코드 생성 (status: ready)
+        new_payment = Payment(
+            user_id=current_user.id,
+            payment_type=payment_request.payment_type,
+            meeting_id=payment_request.meeting_id,
+            amount=actual_amount,
+            partner_order_id=partner_order_id,
+            partner_user_id=partner_user_id,
+            status="ready"
+        )
+        db.add(new_payment)
+        db.commit()
+        db.refresh(new_payment)
+
+        # 카카오페이 결제 준비 요청
+        kakao_response = kakao_pay_client.ready(
+            partner_order_id=partner_order_id,
+            partner_user_id=partner_user_id,
+            item_name=item_name,
+            quantity=1,
+            total_amount=int(actual_amount)
+        )
+
+        # tid 저장
+        new_payment.tid = kakao_response.get("tid")
+        db.commit()
+
+        return KakaoPayReadyResponse(
+            tid=kakao_response["tid"],
+            next_redirect_pc_url=kakao_response["next_redirect_pc_url"],
+            next_redirect_mobile_url=kakao_response["next_redirect_mobile_url"],
+            next_redirect_app_url=kakao_response["next_redirect_app_url"],
+            partner_order_id=partner_order_id,
+            created_at=datetime.utcnow()
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Payment ready failed: {str(e)}"
+        )
+
+
+@app.get("/payment/approve", response_class=HTMLResponse)
+async def payment_approve_redirect(
+    pg_token: str,
+    partner_order_id: str,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    """
+    카카오페이 결제 승인 리다이렉트 핸들러
+    - 카카오페이에서 결제 완료 후 리다이렉트되는 엔드포인트
+    """
+    try:
+        # Payment 레코드 조회
+        payment = db.query(Payment).filter(
+            Payment.partner_order_id == partner_order_id
+        ).first()
+
+        if not payment:
+            return f"""
+            <html>
+                <body>
+                    <h1>결제 오류</h1>
+                    <p>결제 정보를 찾을 수 없습니다.</p>
+                    <a href="/">홈으로 돌아가기</a>
+                </body>
+            </html>
+            """
+
+        # 카카오페이 결제 승인 요청
+        kakao_response = kakao_pay_client.approve(
+            tid=payment.tid,
+            partner_order_id=partner_order_id,
+            partner_user_id=payment.partner_user_id,
+            pg_token=pg_token
+        )
+
+        # Payment 레코드 업데이트
+        payment.status = "approved"
+        payment.aid = kakao_response.get("aid")
+        payment.payment_method_type = kakao_response.get("payment_method_type")
+        payment.approved_at = datetime.utcnow()
+
+        # 멤버십 결제인 경우 Membership 레코드 생성
+        if payment.payment_type == "membership":
+            # 기존 활성 멤버십 확인
+            existing_membership = db.query(Membership).filter(
+                Membership.user_id == payment.user_id,
+                Membership.status == "active"
+            ).first()
+
+            if existing_membership:
+                # 기존 멤버십이 있으면 만료 처리
+                existing_membership.status = "expired"
+
+            # 새 멤버십 생성
+            membership_duration = timedelta(days=30 if payment.payment_type == "monthly" else 365)
+            new_membership = Membership(
+                user_id=payment.user_id,
+                membership_type=kakao_response.get("item_name", "").split()[2].lower(),  # 임시
+                status="active",
+                start_date=datetime.utcnow(),
+                end_date=datetime.utcnow() + membership_duration,
+                price=payment.amount,
+                auto_renew=True
+            )
+            db.add(new_membership)
+            db.flush()
+
+            payment.membership_id = new_membership.id
+
+        db.commit()
+
+        # 성공 페이지로 리다이렉트
+        return f"""
+        <html>
+            <head>
+                <title>결제 완료</title>
+                <style>
+                    body {{
+                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        min-height: 100vh;
+                        margin: 0;
+                        background-color: #f9f9f9;
+                    }}
+                    .container {{
+                        background: white;
+                        padding: 40px;
+                        border-radius: 12px;
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                        text-align: center;
+                        max-width: 500px;
+                    }}
+                    h1 {{ color: #3498db; margin-bottom: 20px; }}
+                    .success-icon {{
+                        font-size: 60px;
+                        color: #27ae60;
+                        margin-bottom: 20px;
+                    }}
+                    .button {{
+                        display: inline-block;
+                        margin-top: 20px;
+                        padding: 12px 24px;
+                        background-color: #3498db;
+                        color: white;
+                        text-decoration: none;
+                        border-radius: 6px;
+                        transition: background-color 0.3s;
+                    }}
+                    .button:hover {{ background-color: #2980b9; }}
+                    .payment-info {{
+                        background-color: #ecf0f1;
+                        padding: 20px;
+                        border-radius: 8px;
+                        margin-top: 20px;
+                        text-align: left;
+                    }}
+                    .payment-info p {{ margin: 8px 0; }}
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="success-icon">✓</div>
+                    <h1>결제가 완료되었습니다!</h1>
+                    <p>결제가 성공적으로 처리되었습니다.</p>
+                    <div class="payment-info">
+                        <p><strong>결제 금액:</strong> {int(payment.amount):,}원</p>
+                        <p><strong>결제 수단:</strong> {kakao_response.get("payment_method_type", "카카오페이")}</p>
+                        <p><strong>승인 시간:</strong> {payment.approved_at.strftime("%Y-%m-%d %H:%M:%S")}</p>
+                    </div>
+                    <a href="/dashboard" class="button">대시보드로 이동</a>
+                    <a href="/meetings_list" class="button">모임 목록으로</a>
+                </div>
+            </body>
+        </html>
+        """
+
+    except Exception as e:
+        db.rollback()
+        return f"""
+        <html>
+            <body>
+                <h1>결제 승인 실패</h1>
+                <p>결제 승인 중 오류가 발생했습니다: {str(e)}</p>
+                <a href="/">홈으로 돌아가기</a>
+            </body>
+        </html>
+        """
+
+
+@app.get("/payment/cancel", response_class=HTMLResponse)
+async def payment_cancel_redirect(partner_order_id: str, db: Session = Depends(get_db)):
+    """
+    카카오페이 결제 취소 리다이렉트 핸들러
+    - 사용자가 결제를 취소한 경우
+    """
+    # Payment 레코드 상태 업데이트
+    payment = db.query(Payment).filter(
+        Payment.partner_order_id == partner_order_id
+    ).first()
+
+    if payment:
+        payment.status = "cancelled"
+        payment.cancelled_at = datetime.utcnow()
+        db.commit()
+
+    return """
+    <html>
+        <head>
+            <title>결제 취소</title>
+            <style>
+                body {
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    min-height: 100vh;
+                    margin: 0;
+                    background-color: #f9f9f9;
+                }
+                .container {
+                    background: white;
+                    padding: 40px;
+                    border-radius: 12px;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                    text-align: center;
+                    max-width: 500px;
+                }
+                h1 { color: #e74c3c; margin-bottom: 20px; }
+                .cancel-icon {
+                    font-size: 60px;
+                    color: #e74c3c;
+                    margin-bottom: 20px;
+                }
+                .button {
+                    display: inline-block;
+                    margin-top: 20px;
+                    padding: 12px 24px;
+                    background-color: #3498db;
+                    color: white;
+                    text-decoration: none;
+                    border-radius: 6px;
+                    transition: background-color 0.3s;
+                }
+                .button:hover { background-color: #2980b9; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="cancel-icon">✕</div>
+                <h1>결제가 취소되었습니다</h1>
+                <p>결제를 취소하셨습니다. 다시 시도하시려면 모임 목록으로 돌아가주세요.</p>
+                <a href="/meetings_list" class="button">모임 목록으로</a>
+                <a href="/dashboard" class="button">대시보드로</a>
+            </div>
+        </body>
+    </html>
+    """
+
+
+@app.get("/payment/fail", response_class=HTMLResponse)
+async def payment_fail_redirect(partner_order_id: str, db: Session = Depends(get_db)):
+    """
+    카카오페이 결제 실패 리다이렉트 핸들러
+    - 결제 처리 중 오류가 발생한 경우
+    """
+    # Payment 레코드 상태 업데이트
+    payment = db.query(Payment).filter(
+        Payment.partner_order_id == partner_order_id
+    ).first()
+
+    if payment:
+        payment.status = "failed"
+        db.commit()
+
+    return """
+    <html>
+        <head>
+            <title>결제 실패</title>
+            <style>
+                body {
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    min-height: 100vh;
+                    margin: 0;
+                    background-color: #f9f9f9;
+                }
+                .container {
+                    background: white;
+                    padding: 40px;
+                    border-radius: 12px;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                    text-align: center;
+                    max-width: 500px;
+                }
+                h1 { color: #e74c3c; margin-bottom: 20px; }
+                .fail-icon {
+                    font-size: 60px;
+                    color: #e74c3c;
+                    margin-bottom: 20px;
+                }
+                .button {
+                    display: inline-block;
+                    margin-top: 20px;
+                    padding: 12px 24px;
+                    background-color: #3498db;
+                    color: white;
+                    text-decoration: none;
+                    border-radius: 6px;
+                    transition: background-color 0.3s;
+                }
+                .button:hover { background-color: #2980b9; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="fail-icon">⚠</div>
+                <h1>결제 처리 실패</h1>
+                <p>결제 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.</p>
+                <p>문제가 계속되면 고객 지원팀에 문의해주세요.</p>
+                <a href="/meetings_list" class="button">모임 목록으로</a>
+                <a href="/dashboard" class="button">대시보드로</a>
+            </div>
+        </body>
+    </html>
+    """
+
+
+@app.post("/payment/refund")
+async def payment_refund(
+    refund_request: PaymentRefundRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    결제 환불 요청
+    - 관리자 또는 결제자 본인만 환불 가능
+    """
+    try:
+        payment = db.query(Payment).filter(Payment.id == refund_request.payment_id).first()
+
+        if not payment:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Payment not found"
+            )
+
+        # 권한 확인 (결제자 본인 또는 관리자)
+        if payment.user_id != current_user.id:
+            # TODO: 관리자 권한 확인 로직 추가
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You don't have permission to refund this payment"
+            )
+
+        if payment.status != "approved":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Only approved payments can be refunded"
+            )
+
+        # 카카오페이 환불 요청
+        kakao_response = kakao_pay_client.cancel(
+            tid=payment.tid,
+            cancel_amount=int(refund_request.refund_amount)
+        )
+
+        # Payment 레코드 업데이트
+        payment.status = "refunded"
+        payment.refund_amount = refund_request.refund_amount
+        payment.refund_reason = refund_request.refund_reason
+        payment.cancelled_at = datetime.utcnow()
+
+        # 멤버십 환불인 경우 멤버십 상태 업데이트
+        if payment.membership_id:
+            membership = db.query(Membership).filter(Membership.id == payment.membership_id).first()
+            if membership:
+                membership.status = "cancelled"
+                membership.auto_renew = False
+
+        db.commit()
+
+        return {
+            "success": True,
+            "message": "Refund processed successfully",
+            "payment_id": payment.id,
+            "refund_amount": refund_request.refund_amount,
+            "kakao_response": kakao_response
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Refund failed: {str(e)}"
+        )
+
+
+@app.get("/payment/history", response_model=list[PaymentOut])
+async def get_payment_history(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    사용자의 결제 내역 조회
+    """
+    payments = db.query(Payment).filter(
+        Payment.user_id == current_user.id
+    ).order_by(Payment.created_at.desc()).all()
+
+    return payments
+
+
+@app.get("/membership/current", response_model=MembershipOut)
+async def get_current_membership(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    현재 활성 멤버십 조회
+    """
+    membership = db.query(Membership).filter(
+        Membership.user_id == current_user.id,
+        Membership.status == "active"
+    ).first()
+
+    if not membership:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No active membership found"
+        )
+
+    return membership

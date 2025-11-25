@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey, Float, Boolean, Text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from datetime import datetime
@@ -81,14 +81,15 @@ class VerificationCode(Base):
 # --------------------
 class Meeting(Base):
     __tablename__ = "meetings"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=False)  # 모임 제목
     date_time = Column(DateTime, nullable=False)  # 모임 날짜 및 시간
     location = Column(String, nullable=False)  # 모임 장소
     capacity = Column(Integer, nullable=False)  # 정원
+    price = Column(Float, nullable=False, default=10000.0)  # 모임 참가비 (기본값: 10,000원)
     created_at = Column(DateTime, default=datetime.utcnow)
-    
+
     # 관계: Meeting과 User의 다대다 관계
     participants = relationship("UserMeeting", back_populates="meeting")
 
@@ -108,6 +109,90 @@ class UserMeeting(Base):
     # 관계 정의
     user = relationship("User", back_populates="meetings")
     meeting = relationship("Meeting", back_populates="participants")
+
+
+# --------------------
+# 5. 결제 모델 (Payment Model)
+# --------------------
+class Payment(Base):
+    __tablename__ = "payments"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)  # 결제한 사용자
+
+    # 결제 유형: 'meeting' (모임 등록비) 또는 'membership' (멤버십 구독)
+    payment_type = Column(String, nullable=False)
+
+    # 결제 대상 (모임 ID 또는 멤버십 ID)
+    meeting_id = Column(Integer, ForeignKey("meetings.id"), nullable=True)  # 모임 결제 시
+    membership_id = Column(Integer, ForeignKey("memberships.id"), nullable=True)  # 멤버십 결제 시
+
+    # 결제 금액
+    amount = Column(Float, nullable=False)
+
+    # 카카오페이 결제 정보
+    tid = Column(String, nullable=True, unique=True)  # 카카오페이 거래 고유번호
+    partner_order_id = Column(String, nullable=False, unique=True)  # 가맹점 주문번호
+    partner_user_id = Column(String, nullable=False)  # 가맹점 회원 ID
+
+    # 결제 상태: 'ready', 'approved', 'cancelled', 'failed', 'refunded'
+    status = Column(String, default="ready", nullable=False)
+
+    # 결제 승인 정보
+    aid = Column(String, nullable=True)  # 요청 고유번호 (승인 후)
+    payment_method_type = Column(String, nullable=True)  # 결제 수단 (CARD, MONEY 등)
+
+    # 결제 시간
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    approved_at = Column(DateTime, nullable=True)  # 결제 승인 시간
+    cancelled_at = Column(DateTime, nullable=True)  # 결제 취소 시간
+
+    # 환불 정보
+    refund_reason = Column(Text, nullable=True)
+    refund_amount = Column(Float, nullable=True, default=0.0)
+
+    # 관계
+    user = relationship("User")
+    meeting = relationship("Meeting", foreign_keys=[meeting_id])
+    membership = relationship("Membership", foreign_keys=[membership_id])
+
+
+# --------------------
+# 6. 멤버십 구독 모델 (Membership Model)
+# --------------------
+class Membership(Base):
+    __tablename__ = "memberships"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, unique=True)  # 한 사용자당 하나의 활성 멤버십
+
+    # 멤버십 유형: 'monthly' (월간) 또는 'annual' (연간)
+    membership_type = Column(String, nullable=False)
+
+    # 멤버십 상태: 'active', 'cancelled', 'expired'
+    status = Column(String, default="active", nullable=False)
+
+    # 멤버십 기간
+    start_date = Column(DateTime, default=datetime.utcnow, nullable=False)
+    end_date = Column(DateTime, nullable=False)  # 멤버십 만료일
+
+    # 자동 갱신 여부
+    auto_renew = Column(Boolean, default=True, nullable=False)
+
+    # 가격 정보
+    price = Column(Float, nullable=False)
+
+    # 생성 및 업데이트 시간
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    # 관계
+    user = relationship("User")
+    payments = relationship("Payment", back_populates="membership")
+
+
+# Payment 모델에 membership relationship 추가
+Payment.membership = relationship("Membership", back_populates="payments")
 
 
 # --------------------
