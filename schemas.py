@@ -189,6 +189,11 @@ class KakaoLoginRequest(BaseModel):
     access_token: str  # 카카오에서 받은 액세스 토큰
 
 
+class GoogleLoginRequest(BaseModel):
+    """Google 로그인 요청 스키마"""
+    id_token: str  # Google에서 받은 ID 토큰
+
+
 class SocialLoginResponse(BaseModel):
     """소셜 로그인 응답 스키마"""
     access_token: str

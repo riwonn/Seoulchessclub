@@ -19,6 +19,10 @@ APPLE_CLIENT_ID = os.getenv("APPLE_CLIENT_ID", "com.yourcompany.communitycontrol
 # Kakao 설정
 KAKAO_USER_INFO_URL = "https://kapi.kakao.com/v2/user/me"
 
+# Google 설정
+GOOGLE_TOKEN_INFO_URL = "https://oauth2.googleapis.com/tokeninfo"
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
+
 
 async def verify_apple_token(identity_token: str) -> Dict[str, Any]:
     """
@@ -156,4 +160,70 @@ def extract_apple_user_info(decoded_token: Dict[str, Any], user_info: Optional[D
         "email": email,
         "name": name or "Apple User",
     }
+
+
+async def verify_google_token(id_token: str) -> Dict[str, Any]:
+    """
+    Google ID 토큰을 검증하고 사용자 정보를 추출합니다.
+
+    Args:
+        id_token: Google에서 발급받은 ID 토큰
+
+    Returns:
+        사용자 정보 딕셔너리 (sub, email, name 등)
+
+    Raises:
+        HTTPException: 토큰이 유효하지 않은 경우
+    """
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                GOOGLE_TOKEN_INFO_URL,
+                params={"id_token": id_token}
+            )
+
+            if response.status_code != 200:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid Google ID token",
+                )
+
+            token_info = response.json()
+
+            # 토큰의 클라이언트 ID 확인
+            if GOOGLE_CLIENT_ID and token_info.get("aud") != GOOGLE_CLIENT_ID:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid client ID in Google token",
+                )
+
+            # Google 응답 형식:
+            # {
+            #   "sub": "110169484474386276334",
+            #   "email": "user@gmail.com",
+            #   "email_verified": "true",
+            #   "name": "홍길동",
+            #   "picture": "https://...",
+            #   "aud": "your-client-id.apps.googleusercontent.com"
+            # }
+
+            return {
+                "id": token_info.get("sub"),
+                "email": token_info.get("email"),
+                "name": token_info.get("name", "Google User"),
+                "email_verified": token_info.get("email_verified") == "true",
+            }
+
+    except httpx.RequestError as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error connecting to Google API: {str(e)}",
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error verifying Google token: {str(e)}",
+        )
 

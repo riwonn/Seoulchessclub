@@ -14,12 +14,12 @@ import random
 from dotenv import load_dotenv
 from sqlalchemy.orm import Session, joinedload
 from database import VerificationCode, SessionLocal, User, Meeting, UserMeeting, Payment, Membership, get_db, init_db
-from schemas import SMSRequest, SMSVerify, UserCreate, UserOut, CSParseRequest, CSParseResponse, MeetingCreate, MeetingOut, UserMeetingInterest, LoginRequest, LoginResponse, AppleLoginRequest, KakaoLoginRequest, SocialLoginResponse, ChatRequest, ChatResponse, AdminLoginRequest, PaymentCreateRequest, KakaoPayReadyResponse, KakaoPayApproveRequest, PaymentOut, MembershipOut, PaymentCancelRequest, PaymentRefundRequest, MembershipCreateRequest
+from schemas import SMSRequest, SMSVerify, UserCreate, UserOut, CSParseRequest, CSParseResponse, MeetingCreate, MeetingOut, UserMeetingInterest, LoginRequest, LoginResponse, AppleLoginRequest, KakaoLoginRequest, GoogleLoginRequest, SocialLoginResponse, ChatRequest, ChatResponse, AdminLoginRequest, PaymentCreateRequest, KakaoPayReadyResponse, KakaoPayApproveRequest, PaymentOut, MembershipOut, PaymentCancelRequest, PaymentRefundRequest, MembershipCreateRequest
 from sqlalchemy.exc import IntegrityError # For handling database integrity errors
 import json
 import requests
 from auth import create_access_token, get_current_user, get_current_user_optional
-from social_auth import verify_apple_token, get_kakao_user_info, extract_apple_user_info
+from social_auth import verify_apple_token, get_kakao_user_info, extract_apple_user_info, verify_google_token
 from payment import kakao_pay_client
 
 # .env 파일 로드
@@ -52,7 +52,12 @@ app = FastAPI(title="Community Control AI", version="1.0.0")
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, replace with specific origins
+    allow_origins=[
+        "https://www.seoulchess.club",
+        "https://seoulchess.club",
+        "http://localhost:8000",  # For local development
+        "http://localhost:3000",  # For local frontend development
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -612,6 +617,91 @@ async def kakao_login(request: KakaoLoginRequest, db: Session = Depends(get_db))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Kakao login failed: {str(e)}"
+        )
+
+
+@app.post("/auth/google", response_model=SocialLoginResponse)
+async def google_login(request: GoogleLoginRequest, db: Session = Depends(get_db)):
+    """
+    Google 로그인 API
+
+    Google Sign In을 통해 받은 ID 토큰을 검증하고 사용자를 생성/로그인합니다.
+
+    Args:
+        request: Google 로그인 요청 (id_token)
+        db: 데이터베이스 세션
+
+    Returns:
+        JWT 액세스 토큰과 사용자 정보
+    """
+    try:
+        # 1. Google ID 토큰 검증
+        user_info = await verify_google_token(request.id_token)
+        google_id = user_info["id"]
+        email = user_info.get("email")
+        name = user_info.get("name", "Google User")
+
+        # 이메일이 없는 경우 기본 이메일 생성
+        if not email:
+            email = f"google_{google_id}@google.local"
+
+        # 2. 기존 사용자 확인 (Google ID로)
+        existing_user = db.query(User).filter(
+            User.social_provider == "google",
+            User.social_id == google_id
+        ).first()
+
+        is_new_user = False
+
+        if existing_user:
+            # 기존 사용자: total_visits 증가
+            existing_user.total_visits += 1
+            existing_user.updated_at = datetime.utcnow()
+            db.commit()
+            db.refresh(existing_user)
+            user = existing_user
+        else:
+            # 신규 사용자: 기본 정보로 회원 생성
+            is_new_user = True
+            new_user = User(
+                name=name,
+                email=email,
+                phone_number=None,  # Google 로그인은 전화번호 없음
+                gender="OTHER",  # 기본값
+                chess_experience="NO_BUT_WANT_TO_LEARN",  # 기본값
+                social_provider="google",
+                social_id=google_id,
+                total_visits=1
+            )
+
+            db.add(new_user)
+            db.commit()
+            db.refresh(new_user)
+            user = new_user
+
+        # 3. JWT 토큰 생성
+        access_token = create_access_token(
+            data={
+                "user_id": user.id,
+                "email": user.email,
+                "social_provider": "google"
+            }
+        )
+
+        return SocialLoginResponse(
+            access_token=access_token,
+            token_type="bearer",
+            user=user,
+            is_new_user=is_new_user
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Google login failed: {str(e)}"
         )
 
 

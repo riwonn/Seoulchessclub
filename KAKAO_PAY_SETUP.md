@@ -211,7 +211,7 @@ For Kakao Pay API documentation:
 - [Kakao Pay API Docs](https://developers.kakao.com/docs/latest/ko/kakaopay/common)
 
 For application-specific issues:
-- Contact: seoulchessclub@gmail.com
+- Contact: contact@seoulchess.club
 
 ## Security Notes
 
