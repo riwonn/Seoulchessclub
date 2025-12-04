@@ -897,7 +897,8 @@ async def create_meeting(meeting_data: MeetingCreate, db: Session = Depends(get_
             title=meeting_data.title,
             date_time=meeting_data.date_time,
             location=meeting_data.location,
-            capacity=meeting_data.capacity
+            capacity=meeting_data.capacity,
+            price=meeting_data.price
         )
         
         db.add(new_meeting)
