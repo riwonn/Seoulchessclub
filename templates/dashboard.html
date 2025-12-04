@@ -270,6 +270,101 @@
             min-height: 150px;
             resize: vertical;
         }
+
+        .btn-edit {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            padding: var(--space-2) var(--space-4);
+            border-radius: var(--radius-sm);
+            font-size: var(--text-xs);
+            font-weight: var(--font-medium);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            margin-right: var(--space-2);
+        }
+
+        .btn-edit:hover {
+            background: rgba(59, 130, 246, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .btn-delete {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            padding: var(--space-2) var(--space-4);
+            border-radius: var(--radius-sm);
+            font-size: var(--text-xs);
+            font-weight: var(--font-medium);
+            cursor: pointer;
+            transition: all var(--transition-base);
+        }
+
+        .btn-delete:hover {
+            background: rgba(239, 68, 68, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .modal-overlay-custom {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay-custom.show {
+            display: flex;
+        }
+
+        .modal-content-custom {
+            background: var(--color-overlay-dark);
+            border: 1px solid var(--color-border-light);
+            border-radius: var(--radius-xl);
+            padding: var(--space-6);
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header-custom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-5);
+        }
+
+        .modal-title-custom {
+            font-size: var(--text-2xl);
+            font-weight: var(--font-semibold);
+            color: var(--color-text-white);
+        }
+
+        .modal-close-btn {
+            background: none;
+            border: none;
+            color: var(--color-text-muted);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color var(--transition-base);
+        }
+
+        .modal-close-btn:hover {
+            color: var(--color-text-white);
+        }
     </style>
 </head>
 <body>
@@ -307,6 +402,10 @@
                         <label for="meeting-capacity" class="form-label">Capacity *</label>
                         <input type="number" id="meeting-capacity" name="capacity" required min="1" max="100" class="form-input" placeholder="e.g., 20">
                     </div>
+                    <div class="form-group">
+                        <label for="meeting-price" class="form-label">Price (₩) *</label>
+                        <input type="number" id="meeting-price" name="price" required min="0" step="1000" value="10000" class="form-input" placeholder="e.g., 10000">
+                    </div>
                 </div>
                 <div style="display: flex; align-items: center; gap: var(--space-4); margin-top: var(--space-4);">
                     <button type="submit" id="create-meeting-btn" class="btn-success">Create Meeting</button>
@@ -318,6 +417,32 @@
                 <div id="meeting-success" class="alert alert-success"></div>
                 <div id="meeting-error" class="alert alert-error"></div>
             </form>
+        </div>
+
+        <!-- Meetings Table -->
+        <div class="section-card">
+            <h2 class="section-title">Meetings</h2>
+            <div class="table-wrapper">
+                <table id="meetings-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Date & Time</th>
+                            <th>Location</th>
+                            <th>Capacity</th>
+                            <th>Price</th>
+                            <th>Participants</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="meetings-tbody">
+                        <tr>
+                            <td colspan="8" class="empty-state">Loading meetings...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <!-- Members Table -->
@@ -463,6 +588,46 @@
         </div>
     </div>
 
+    <!-- Edit Meeting Modal -->
+    <div id="edit-modal" class="modal-overlay-custom">
+        <div class="modal-content-custom">
+            <div class="modal-header-custom">
+                <h3 class="modal-title-custom">Edit Meeting</h3>
+                <button class="modal-close-btn" onclick="closeEditModal()">&times;</button>
+            </div>
+            <form id="edit-meeting-form">
+                <input type="hidden" id="edit-meeting-id">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="edit-meeting-title" class="form-label">Title *</label>
+                        <input type="text" id="edit-meeting-title" required class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-meeting-datetime" class="form-label">Date & Time *</label>
+                        <input type="datetime-local" id="edit-meeting-datetime" required class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-meeting-location" class="form-label">Location *</label>
+                        <input type="text" id="edit-meeting-location" required class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-meeting-capacity" class="form-label">Capacity *</label>
+                        <input type="number" id="edit-meeting-capacity" required min="1" max="100" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-meeting-price" class="form-label">Price (₩) *</label>
+                        <input type="number" id="edit-meeting-price" required min="0" step="1000" class="form-input">
+                    </div>
+                </div>
+                <div style="display: flex; gap: var(--space-3); margin-top: var(--space-4);">
+                    <button type="submit" class="btn-success">Update Meeting</button>
+                    <button type="button" class="btn-primary" onclick="closeEditModal()">Cancel</button>
+                </div>
+                <div id="edit-alert" class="alert" style="margin-top: var(--space-4);"></div>
+            </form>
+        </div>
+    </div>
+
     <script>
         // Meeting Form
         document.getElementById('meeting-form').addEventListener('submit', async function(e) {
@@ -477,6 +642,7 @@
             const dateTime = document.getElementById('meeting-datetime').value;
             const location = document.getElementById('meeting-location').value.trim();
             const capacity = parseInt(document.getElementById('meeting-capacity').value);
+            const price = parseFloat(document.getElementById('meeting-price').value);
 
             success.classList.remove('show');
             error.classList.remove('show');
@@ -488,7 +654,7 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        title, date_time: new Date(dateTime).toISOString(), location, capacity
+                        title, date_time: new Date(dateTime).toISOString(), location, capacity, price
                     })
                 });
 
@@ -499,6 +665,7 @@
                 success.textContent = `Meeting "${data.title}" created successfully!`;
                 success.classList.add('show');
                 document.getElementById('meeting-form').reset();
+                loadMeetings(); // Reload meetings list
 
                 setTimeout(() => success.classList.remove('show'), 3000);
             } catch (err) {
@@ -509,6 +676,143 @@
                 loading.classList.remove('show');
             }
         });
+
+        // Load Meetings
+        async function loadMeetings() {
+            const tbody = document.getElementById('meetings-tbody');
+
+            try {
+                const response = await fetch('/meetings');
+                const meetings = await response.json();
+
+                if (!response.ok) throw new Error('Failed to load meetings');
+
+                if (meetings.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" class="empty-state">No meetings found.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = meetings.map(meeting => `
+                    <tr>
+                        <td style="color: var(--color-text-white); font-weight: var(--font-medium);">${meeting.id}</td>
+                        <td style="color: var(--color-text-white);">${meeting.title}</td>
+                        <td>${new Date(meeting.date_time).toLocaleString('ko-KR')}</td>
+                        <td>${meeting.location}</td>
+                        <td>${meeting.capacity}</td>
+                        <td>₩${meeting.price.toLocaleString()}</td>
+                        <td><span class="badge badge-primary">${meeting.participants.length} / ${meeting.capacity}</span></td>
+                        <td>
+                            <button class="btn-edit" onclick="openEditModal(${meeting.id})">Edit</button>
+                            <button class="btn-delete" onclick="deleteMeeting(${meeting.id}, '${meeting.title}')">Delete</button>
+                        </td>
+                    </tr>
+                `).join('');
+
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="8" class="empty-state" style="color: var(--color-error-text);">Error loading meetings: ${err.message}</td></tr>`;
+            }
+        }
+
+        // Open Edit Modal
+        async function openEditModal(meetingId) {
+            try {
+                const response = await fetch('/meetings');
+                const meetings = await response.json();
+                const meeting = meetings.find(m => m.id === meetingId);
+
+                if (!meeting) throw new Error('Meeting not found');
+
+                document.getElementById('edit-meeting-id').value = meeting.id;
+                document.getElementById('edit-meeting-title').value = meeting.title;
+                document.getElementById('edit-meeting-location').value = meeting.location;
+                document.getElementById('edit-meeting-capacity').value = meeting.capacity;
+                document.getElementById('edit-meeting-price').value = meeting.price;
+
+                // Convert datetime to local format
+                const date = new Date(meeting.date_time);
+                const localDateTime = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+                    .toISOString()
+                    .slice(0, 16);
+                document.getElementById('edit-meeting-datetime').value = localDateTime;
+
+                document.getElementById('edit-modal').classList.add('show');
+            } catch (err) {
+                alert('Error loading meeting: ' + err.message);
+            }
+        }
+
+        // Close Edit Modal
+        function closeEditModal() {
+            document.getElementById('edit-modal').classList.remove('show');
+            document.getElementById('edit-alert').classList.remove('show', 'alert-success', 'alert-error');
+        }
+
+        // Edit Meeting Form Submit
+        document.getElementById('edit-meeting-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const meetingId = document.getElementById('edit-meeting-id').value;
+            const title = document.getElementById('edit-meeting-title').value.trim();
+            const dateTime = document.getElementById('edit-meeting-datetime').value;
+            const location = document.getElementById('edit-meeting-location').value.trim();
+            const capacity = parseInt(document.getElementById('edit-meeting-capacity').value);
+            const price = parseFloat(document.getElementById('edit-meeting-price').value);
+
+            const alert = document.getElementById('edit-alert');
+
+            try {
+                const response = await fetch(`/meetings/${meetingId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title,
+                        date_time: new Date(dateTime).toISOString(),
+                        location,
+                        capacity,
+                        price
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) throw new Error(data.detail || 'Failed to update meeting');
+
+                alert.textContent = 'Meeting updated successfully!';
+                alert.classList.add('show', 'alert-success');
+                alert.classList.remove('alert-error');
+
+                loadMeetings(); // Reload meetings list
+
+                setTimeout(() => closeEditModal(), 1500);
+            } catch (err) {
+                alert.textContent = err.message;
+                alert.classList.add('show', 'alert-error');
+                alert.classList.remove('alert-success');
+            }
+        });
+
+        // Delete Meeting
+        async function deleteMeeting(meetingId, meetingTitle) {
+            if (!confirm(`Are you sure you want to delete "${meetingTitle}"?`)) return;
+
+            try {
+                const response = await fetch(`/meetings/${meetingId}`, {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) throw new Error(data.detail || 'Failed to delete meeting');
+
+                alert(`Meeting "${meetingTitle}" deleted successfully!`);
+                loadMeetings(); // Reload meetings list
+            } catch (err) {
+                alert('Error deleting meeting: ' + err.message);
+            }
+        }
+
+        // Load meetings on page load
+        loadMeetings();
 
         // AI CS Parser
         document.getElementById('analyze-btn').addEventListener('click', async function() {

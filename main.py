@@ -924,11 +924,82 @@ async def get_all_meetings(db: Session = Depends(get_db)):
     try:
         meetings = db.query(Meeting).options(joinedload(Meeting.participants)).all()
         return meetings
-        
+
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error fetching meetings: {str(e)}"
+        )
+
+
+@app.put("/meetings/{meeting_id}", response_model=MeetingOut)
+async def update_meeting(
+    meeting_id: int,
+    meeting_data: MeetingCreate,
+    db: Session = Depends(get_db)
+):
+    """
+    모임 정보 수정 API (운영자용).
+    모임 ID를 받아 해당 모임의 정보를 업데이트합니다.
+    """
+    try:
+        meeting = db.query(Meeting).filter(Meeting.id == meeting_id).first()
+
+        if not meeting:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Meeting with id {meeting_id} not found"
+            )
+
+        # 업데이트
+        meeting.title = meeting_data.title
+        meeting.date_time = meeting_data.date_time
+        meeting.location = meeting_data.location
+        meeting.capacity = meeting_data.capacity
+        meeting.price = meeting_data.price
+
+        db.commit()
+        db.refresh(meeting)
+
+        return meeting
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error updating meeting: {str(e)}"
+        )
+
+
+@app.delete("/meetings/{meeting_id}", status_code=status.HTTP_200_OK)
+async def delete_meeting(meeting_id: int, db: Session = Depends(get_db)):
+    """
+    모임 삭제 API (운영자용).
+    모임 ID를 받아 해당 모임을 삭제합니다.
+    """
+    try:
+        meeting = db.query(Meeting).filter(Meeting.id == meeting_id).first()
+
+        if not meeting:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Meeting with id {meeting_id} not found"
+            )
+
+        db.delete(meeting)
+        db.commit()
+
+        return {"message": f"Meeting '{meeting.title}' deleted successfully"}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error deleting meeting: {str(e)}"
         )
 
 
